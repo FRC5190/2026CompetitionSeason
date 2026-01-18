@@ -148,4 +148,9 @@ public class SwerveSubsystem extends SubsystemBase {
     return new PathPlannerAuto(pathName);
 
   }
+
+  public void setMotorBrake(boolean brake)
+  {
+    swerveDrive.setMotorIdleMode(brake);
+  }
 }

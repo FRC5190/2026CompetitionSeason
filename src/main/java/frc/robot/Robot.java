@@ -5,6 +5,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
+  private final Timer disabledTimer = new Timer();
 
   private final RobotContainer m_robotContainer;
 
@@ -46,14 +48,30 @@ public class Robot extends TimedRobot {
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+      m_robotContainer.setMotorBrake(true);
+
+  // Start timer to release brake after delay
+  disabledTimer.reset();
+  disabledTimer.start();
+
+  CommandScheduler.getInstance().cancelAll();
+  }
 
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+     if (disabledTimer.hasElapsed(10)) {
+    m_robotContainer.setMotorBrake(false);
+    disabledTimer.stop();
+    disabledTimer.reset();
+  }
+  }
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    m_robotContainer.setMotorBrake(true);
+
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -72,6 +90,8 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
+    m_robotContainer.setMotorBrake(true);
+
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

@@ -83,4 +83,8 @@ public class RobotContainer {
     // An example command will be run in autonomous
     return drivebase.getAutonomousCommand("Simple Auto");
   }
+  public void setMotorBrake(boolean brake)
+  {
+    drivebase.setMotorBrake(brake);
+  }
 }
