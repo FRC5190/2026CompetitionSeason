@@ -170,26 +170,27 @@ public class SwerveSubsystem extends SubsystemBase {
 
 
   // Returns the first seen tag ID (if any)
-public OptionalInt getSeenAprilTagId() {
-  var est = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-  if (est == null || est.tagCount <= 0 || est.rawFiducials == null || est.rawFiducials.length == 0) {
-    return OptionalInt.empty();
+  public OptionalInt getSeenAprilTagId() {
+    var est = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    if (est == null || est.tagCount <= 0 || est.rawFiducials == null || est.rawFiducials.length == 0) {
+      return OptionalInt.empty();
+    }
+    return OptionalInt.of((int) est.rawFiducials[0].id);
   }
-  return OptionalInt.of((int) est.rawFiducials[0].id);
-}
 
-public boolean seesTag(int id) {
-  var seen = getSeenAprilTagId();
-  return seen.isPresent() && seen.getAsInt() == id;
-}
+  public boolean seesTag(int id) {
+    if (!LimelightHelpers.getTV("limelight")) return false;
+    return ((int) LimelightHelpers.getFiducialID("limelight")) == id;
+  }
 
-// Pathfind to a target pose (field coordinates)
-public Command goToPose(Pose2d target) {
-  PathConstraints constraints = new PathConstraints(
-      3.0, 2.0,          // max vel/accel (m/s, m/s^2)
-      Math.PI, 2*Math.PI // max ang vel/accel (rad/s, rad/s^2)
-  );
-  return AutoBuilder.pathfindToPoseFlipped(target, constraints);
-}
+
+  // Pathfind to a target pose (field coordinates)
+  public Command goToPose(Pose2d target) {
+    PathConstraints constraints = new PathConstraints(
+        3.0, 2.0,          // max vel/accel (m/s, m/s^2)
+        Math.PI, 2*Math.PI // max ang vel/accel (rad/s, rad/s^2)
+    );
+    return AutoBuilder.pathfindToPoseFlipped(target, constraints);
+  }
 
 }
