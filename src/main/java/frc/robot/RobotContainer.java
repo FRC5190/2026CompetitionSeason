@@ -13,6 +13,8 @@ import swervelib.SwerveInputStream;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -24,10 +26,23 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
-  private final SwerveSubsystem drivebase = new SwerveSubsystem();
+
+  private static final Pose2d TAG_10_TARGET = new Pose2d(2.0, 4.0, Rotation2d.fromDegrees(180));
+
+  private static final Pose2d TAG_15_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
+
+  private static final Pose2d TAG_26_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
+
+  private static final Pose2d TAG_31_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
+
+
+  public final SwerveSubsystem drivebase = new SwerveSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
-      new CommandXboxController(OperatorConstants.kDriverControllerPort);
+      new CommandXboxController(0);
+  private final CommandXboxController m_operatorController =
+      new CommandXboxController(1);
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -63,12 +78,21 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    new Trigger(m_exampleSubsystem::exampleCondition)
-        .onTrue(new ExampleCommand(m_exampleSubsystem));
+    //new Trigger(m_exampleSubsystem::exampleCondition)
+      //  .onTrue(new ExampleCommand(m_exampleSubsystem));
 
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
-    m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+
+    m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goToPose(TAG_10_TARGET));
+
+    m_driverController.b().and(new Trigger(() -> drivebase.seesTag(15))).onTrue(drivebase.goToPose(TAG_15_TARGET));
+
+    m_driverController.x().and(new Trigger(() -> drivebase.seesTag(26))).onTrue(drivebase.goToPose(TAG_26_TARGET));
+    
+    m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
+
   }
 
   /**
@@ -79,5 +103,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return drivebase.getAutonomousCommand("Simple Auto");
+  }
+  public void setMotorBrake(boolean brake)
+  {
+    drivebase.setMotorBrake(brake);
   }
 }
