@@ -21,6 +21,6 @@ public final class Constants {
     
   }
 
-  public static final double maximumSpeed = Units.feetToMeters(4.5);
+  public static final double maximumSpeed = Units.feetToMeters(1);
 
 }
