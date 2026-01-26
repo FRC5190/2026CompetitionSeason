@@ -4,13 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.SwerveSubsystem;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -19,7 +15,6 @@ import frc.robot.subsystems.SwerveSubsystem;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-  private final Timer disabledTimer = new Timer();
 
   private final RobotContainer m_robotContainer;
 
@@ -47,44 +42,18 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-
-
-    ChassisSpeeds speeds = m_robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
-    double omegaRadPerSec = speeds.omegaRadiansPerSecond;
-    double omegaRps = omegaRadPerSec / (2.0 * Math.PI); // rotations per second
-    var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-
-    if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
-      m_robotContainer.drivebase.resetOdometry(llMeasurement.pose);
-    }
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
   @Override
-  public void disabledInit() {
-      m_robotContainer.setMotorBrake(true);
-
-  // Start timer to release brake after delay
-  disabledTimer.reset();
-  disabledTimer.start();
-
-  CommandScheduler.getInstance().cancelAll();
-  }
+  public void disabledInit() {}
 
   @Override
-  public void disabledPeriodic() {
-     if (disabledTimer.hasElapsed(10)) {
-    m_robotContainer.setMotorBrake(false);
-    disabledTimer.stop();
-    disabledTimer.reset();
-  }
-  }
+  public void disabledPeriodic() {}
 
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_robotContainer.setMotorBrake(true);
-
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
@@ -103,8 +72,6 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    m_robotContainer.setMotorBrake(true);
-
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }

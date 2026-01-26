@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -20,8 +16,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-
-import java.util.OptionalInt;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -39,18 +33,11 @@ import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 import static edu.wpi.first.units.Units.Meter;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.LimelightHelpers;
-
-
 
 public class SwerveSubsystem extends SubsystemBase {
 
   File directory = new File(Filesystem.getDeployDirectory(),"swerve");
   SwerveDrive  swerveDrive;
-  
-  private final Field2d field2d = new Field2d();
 
   /** Creates a new ExampleSubsystem. */
   public SwerveSubsystem() {
@@ -67,7 +54,6 @@ public class SwerveSubsystem extends SubsystemBase {
       }
 
       setUpPathPlanner();
-      SmartDashboard.putData("Field", field2d);
   }
 
   /**
@@ -108,10 +94,6 @@ public class SwerveSubsystem extends SubsystemBase {
     // TODO Auto-generated method stub
 
     return swerveDrive;
-  }
-
-  public void resetOdometry(Pose2d pose) {
-    swerveDrive.resetOdometry(pose);
   }
 
   public void driveFieldOriented(ChassisSpeeds velocity){
@@ -166,34 +148,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   }
 
-  public void setMotorBrake(boolean brake)
-  {
-    swerveDrive.setMotorIdleMode(brake);
-  }
-
-
-  // Returns the first seen tag ID (if any)
-  public OptionalInt getSeenAprilTagId() {
-    var est = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
-    if (est == null || est.tagCount <= 0 || est.rawFiducials == null || est.rawFiducials.length == 0) {
-      return OptionalInt.empty();
-    }
-    return OptionalInt.of((int) est.rawFiducials[0].id);
-  }
-
-  public boolean seesTag(int id) {
-    if (!LimelightHelpers.getTV("limelight")) return false;
-    return ((int) LimelightHelpers.getFiducialID("limelight")) == id;
-  }
-
-
-  // Pathfind to a target pose (field coordinates)
-  public Command goToPose(Pose2d target) {
-    PathConstraints constraints = new PathConstraints(
-        3.0, 2.0,          // max vel/accel (m/s, m/s^2)
-        Math.PI, 2*Math.PI // max ang vel/accel (rad/s, rad/s^2)
-    );
-    return AutoBuilder.pathfindToPoseFlipped(target, constraints);
-  }
+  
 
 }

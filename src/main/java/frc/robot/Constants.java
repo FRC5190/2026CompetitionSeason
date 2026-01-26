@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
+import swervelib.math.Matter;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -14,13 +16,14 @@ import edu.wpi.first.math.util.Units;
  * <p>It is advised to statically import this class (or one of its inner classes) wherever the
  * constants are needed, to reduce verbosity.
  */
-public final class Constants {
+
+ public final class Constants {
   public static class OperatorConstants {
-    public static final int kDriverControllerPort = 1;
+    public static final int kDriverControllerPort = 0;
     public static final double DEADBAND = 0.05;
     
   }
 
-  public static final double maximumSpeed = Units.feetToMeters(1);
+  public static final double maximumSpeed = Units.feetToMeters(1.0);
 
 }
