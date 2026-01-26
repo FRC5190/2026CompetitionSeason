@@ -24,6 +24,6 @@ import swervelib.math.Matter;
     
   }
 
-  public static final double maximumSpeed = Units.feetToMeters(1.0);
+  public static final double maximumSpeed = Units.feetToMeters(1);
 
 }

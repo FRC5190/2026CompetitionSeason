@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 
 import java.io.File;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -16,6 +17,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+
+import java.util.OptionalInt;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -148,6 +151,32 @@ public class SwerveSubsystem extends SubsystemBase {
 
   }
 
-  
+  public void resetOdometry(Pose2d pose) {
+    swerveDrive.resetOdometry(pose);
+  }
+
+  // Returns the first seen tag ID (if any)
+  public OptionalInt getSeenAprilTagId() {
+    var est = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    if (est == null || est.tagCount <= 0 || est.rawFiducials == null || est.rawFiducials.length == 0) {
+      return OptionalInt.empty();
+    }
+    return OptionalInt.of((int) est.rawFiducials[0].id);
+  }
+
+  public boolean seesTag(int id) {
+    if (!LimelightHelpers.getTV("limelight")) return false;
+    return ((int) LimelightHelpers.getFiducialID("limelight")) == id;
+  }
+
+
+  // Pathfind to a target pose (field coordinates)
+  public Command goToPose(Pose2d target) {
+    PathConstraints constraints = new PathConstraints(
+        0.25, 0.25,          // max vel/accel (m/s, m/s^2)
+        Math.PI, 2*Math.PI // max ang vel/accel (rad/s, rad/s^2)
+    );
+    return AutoBuilder.pathfindToPoseFlipped(target, constraints);
+  }
 
 }
