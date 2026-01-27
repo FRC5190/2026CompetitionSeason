@@ -5,6 +5,7 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveInputStream;
 
 import java.util.OptionalInt;
@@ -30,6 +31,7 @@ public class RobotContainer {
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
   public final SwerveSubsystem drivebase = new SwerveSubsystem();
+  public final VisionSubsystem vision = new VisionSubsystem();
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(1);
@@ -98,11 +100,13 @@ public class RobotContainer {
     //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goTagRelative(10, 1.0, 0.0, 0.0));
 
 
-    m_driverController.b().and(new Trigger(() -> drivebase.seesTag(15))).onTrue(drivebase.goToPose(TAG_15_TARGET));
+    // m_driverController.b().and(new Trigger(() -> drivebase.seesTag(15))).onTrue(drivebase.goToPose(TAG_15_TARGET));
 
-    m_driverController.x().and(new Trigger(() -> drivebase.seesTag(26))).onTrue(drivebase.goToPose(TAG_26_TARGET));
+    // m_driverController.x().and(new Trigger(() -> drivebase.seesTag(26))).onTrue(drivebase.goToPose(TAG_26_TARGET));
     
-    m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
+    // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
+
+    m_driverController.rightBumper().whileTrue(drivebase.alignToOffset(0.5, 0, 180));
   }
 
   /**

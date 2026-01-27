@@ -6,9 +6,11 @@ package frc.robot;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.SwerveSubsystem;
+import edu.wpi.first.wpilibj.Timer;
 
 
 /**
@@ -20,8 +22,11 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
+  private static final String kLL = "limelight";
+  private double lastPrint = 0.0;
 
-  private SwerveSubsystem drivebase = new SwerveSubsystem();
+
+  //private SwerveSubsystem drivebase = new SwerveSubsystem();
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -48,14 +53,31 @@ public class Robot extends TimedRobot {
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
 
-    ChassisSpeeds speeds = m_robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
-    double omegaRadPerSec = speeds.omegaRadiansPerSecond;
-    double omegaRps = omegaRadPerSec / (2.0 * Math.PI); // rotations per second
-    var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    // ChassisSpeeds speeds = m_robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
+    // double omegaRadPerSec = speeds.omegaRadiansPerSecond;
+    // double omegaRps = omegaRadPerSec / (2.0 * Math.PI); // rotations per second
+    // var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
-    if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
-      m_robotContainer.drivebase.resetOdometry(llMeasurement.pose);
-    }
+    // if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
+    //   m_robotContainer.drivebase.resetOdometry(llMeasurement.pose);
+    // }
+
+    // double tx = LimelightHelpers.getTX(kLL);
+    // boolean tv = LimelightHelpers.getTV(kLL);
+    // double ty = LimelightHelpers.getTY(kLL);
+    // double ta = LimelightHelpers.getTA(kLL);
+    // double tagId = LimelightHelpers.getFiducialID(kLL);
+
+    // SmartDashboard.putNumber("LL/tx", tx);
+    // SmartDashboard.putNumber("LL/ty", ty);
+    // SmartDashboard.putNumber("LL/ta", ta);
+    // SmartDashboard.putNumber("LL/tagID", tagId);
+
+    // double now = Timer.getFPGATimestamp();
+    // if (now - lastPrint > 0.5){
+    //   System.out.println("tv = " + tv + " tx = " + tx + " tagID = " + tagId);
+    //   lastPrint = now;
+    // }
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
