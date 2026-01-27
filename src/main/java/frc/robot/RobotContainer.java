@@ -6,11 +6,18 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
+
+import java.util.OptionalInt;
+import java.util.Set;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -27,7 +34,7 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(1);
 
-  private static final Pose2d TAG_10_TARGET = new Pose2d(6.0, 4.0, Rotation2d.fromDegrees(180));
+  //private final Pose2d TAG_10_TARGET = RobotContainer.this.drivebase.getTargetForTag10();
 
   private static final Pose2d TAG_15_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
 
@@ -77,7 +84,19 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
 
-    m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goToPose(TAG_10_TARGET));
+    //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goToPose(TAG_10_TARGET));
+
+    //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goToPose(TAG_10_TARGET));
+    // m_driverController.a()
+    // .and(new Trigger(() -> drivebase.seesTag(10)))
+    // .onTrue(drivebase.goToTagWithOffset(10,
+    //     Units.feetToMeters(1.0),
+    //     Units.feetToMeters(0),
+    //     Rotation2d.fromDegrees(180)
+    // ));
+
+    //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goTagRelative(10, 1.0, 0.0, 0.0));
+
 
     m_driverController.b().and(new Trigger(() -> drivebase.seesTag(15))).onTrue(drivebase.goToPose(TAG_15_TARGET));
 
