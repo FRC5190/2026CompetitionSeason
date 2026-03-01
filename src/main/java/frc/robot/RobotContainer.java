@@ -106,7 +106,17 @@ public class RobotContainer {
     
     // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
 
-    m_driverController.rightBumper().whileTrue(drivebase.alignToOffset(0.5, 0, 180));
+    m_driverController.rightBumper().and(new Trigger(() -> drivebase.seesTag(10))).
+    whileTrue(drivebase.alignToOffset(1, 0.50, 180, 10));
+
+    m_driverController.leftBumper().and(new Trigger(() -> drivebase.seesTag(15))).
+    whileTrue(drivebase.alignToOffset(0.25, 0, 0, 15));
+
+    m_driverController.a().and(new Trigger(() -> drivebase.seesTag(26))).
+    whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
+
+    m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).
+    whileTrue(drivebase.alignToOffset(0.25, 0, 180, 31));
   }
 
   /**

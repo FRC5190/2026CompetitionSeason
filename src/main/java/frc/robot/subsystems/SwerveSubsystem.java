@@ -70,6 +70,8 @@ public class SwerveSubsystem extends SubsystemBase {
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.maximumSpeed, new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
         fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
+        SmartDashboard.putData("Field", field2d);
+
         // Alternative method if you don't want to supply the conversion factor via JSON files.
         // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
       } catch (Exception e)
@@ -124,7 +126,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
     Pose2d pose = swerveDrive.getPose();
     System.out.println("Robot POSE: X= " + swerveDrive.getPose());
-    System.out.println("test1");
+    System.out.println("test");
   }
 
   @Override
@@ -212,13 +214,13 @@ public class SwerveSubsystem extends SubsystemBase {
 
 
 //   // Pathfind to a target pose (field coordinates)
-  public Command goToPose(Pose2d target) {
-    PathConstraints constraints = new PathConstraints(
-        0.25, 0.25,          // max vel/accel (m/s, m/s^2)
-        Math.PI, 2*Math.PI // max ang vel/accel (rad/s, rad/s^2)
-    );
-    return AutoBuilder.pathfindToPoseFlipped(target, constraints, 0);
-  }
+  // public Command goToPose(Pose2d target) {
+  //   PathConstraints constraints = new PathConstraints(
+  //       0.25, 0.25,          // max vel/accel (m/s, m/s^2)
+  //       Math.PI, 2*Math.PI // max ang vel/accel (rad/s, rad/s^2)
+  //   );
+  //   return AutoBuilder.pathfindToPoseFlipped(target, constraints, 0);
+  // }
 
  
 
@@ -236,21 +238,114 @@ public class SwerveSubsystem extends SubsystemBase {
 //   }, this).withTimeout(5.0);  // Safety stop
 // }
 
-public Command alignToOffset(double offsetX, double offsetY, double headingDeg) {
-  return Commands.runOnce(() -> {
-    // Verify Tag 10 visible
-    if (LimelightHelpers.getFiducialID("limelight") == 10 && LimelightHelpers.getTV("limelight")) {
-      // FIXED Tag 10 field location
-      Optional<Pose3d> tag10Fixed = fieldLayout.getTagPose(10);
-      if (tag10Fixed.isPresent()) {
-        Pose2d fixedTag = tag10Fixed.get().toPose2d();
-        // YOUR OFFSET from FIXED tag location
-        Pose2d target = fixedTag.plus(new Transform2d(offsetX, offsetY, Rotation2d.fromDegrees(headingDeg)));
-        swerveDrive.resetOdometry(target);  // Snap to exact spot
-        System.out.println("Limelight-verified FIXED offset: " + target);
-      }
+public boolean seesTag(int tagId){
+  int currentTag = (int) LimelightHelpers.getFiducialID(kLL);
+  return currentTag == tagId;
+}
+
+public Command alignToOffset(double xOffset, double yOffset, double rotationDegrees, int targetTagId) {
+  return Commands.defer(() -> {
+    // Get the robot's pose in target space (relative to the AprilTag)
+    PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLL);
+   
+    if (llEst == null || llEst.tagCount == 0) {
+      System.out.println("No AprilTag visible - cannot align");
+      return Commands.none();
     }
-  }, this);
+   
+    // Get the current tag ID being tracked
+    int tagId = (int) LimelightHelpers.getFiducialID(kLL);
+
+    if (tagId != targetTagId){
+      System.out.println("Wrong Tag! Seeing tag " + tagId + ", want tag " + targetTagId);
+      return Commands.none();
+    }
+   
+    if (tagId < 0) {
+      System.out.println("Invalid tag ID");
+      return Commands.none();
+    }
+   
+    // Get the tag's field pose
+    Optional<Pose2d> tagPoseOpt = getTagPose(tagId);
+   
+    if (tagPoseOpt.isEmpty()) {
+      System.out.println("Could not find tag " + tagId + " in field layout");
+      return Commands.none();
+    }
+   
+    Pose2d tagPose = tagPoseOpt.get();
+
+    //System.out.println("Tag " + targetTagId + " orientation: " + tagPose.getRotation().getDegrees());
+   
+    // Create the offset transform relative to the tag
+    // The tag's rotation determines the coordinate frame
+    Transform2d offset = new Transform2d(
+      new Translation2d(xOffset, yOffset),
+      Rotation2d.fromDegrees(rotationDegrees).minus(tagPose.getRotation())
+    );
+   
+    // Calculate target pose in field coordinates
+    Pose2d targetPose = tagPose.plus(offset);
+   
+    System.out.println("Tag " + tagId + " at " + tagPose);
+    System.out.println("Driving to offset: " + targetPose);
+   
+    // Use PathPlanner's pathfinding to get there
+    PathConstraints constraints = new PathConstraints(
+      0.25, // max velocity m/s
+      0.25, // max acceleration m/s^2
+      Units.degreesToRadians(180), // max angular velocity rad/s
+      Units.degreesToRadians(360)  // max angular acceleration rad/s^2
+    );
+   
+    // Command pathfindCommand = AutoBuilder.pathfindToPose(
+    //   targetPose,
+    //   constraints,
+    //   0.0 // goal end velocity
+    // );
+
+    return AutoBuilder.pathfindToPose(targetPose, constraints, 0.0);
+   
+    //pathfindCommand.schedule();
+   
+  }, Set.of(this));
+  // .until(() -> {
+  //   // Stop when we're close enough
+  //   PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLL);
+  //   if (llEst == null || llEst.tagCount == 0) return true;
+   
+  //   int tagId = (int) LimelightHelpers.getFiducialID(kLL);
+  //   Optional<Pose2d> tagPoseOpt = getTagPose(tagId);
+   
+  //   if (tagPoseOpt.isEmpty()) return true;
+   
+  //   Pose2d tagPose = tagPoseOpt.get();
+  //   Transform2d offset = new Transform2d(
+  //     new Translation2d(xOffset, yOffset),
+  //     Rotation2d.fromDegrees(rotationDegrees).minus(tagPose.getRotation())
+  //   );
+  //   Pose2d targetPose = tagPose.plus(offset);
+   
+  //   double distance = swerveDrive.getPose().getTranslation().getDistance(targetPose.getTranslation());
+  //   double angleDiff = Math.abs(swerveDrive.getPose().getRotation().minus(targetPose.getRotation()).getDegrees());
+   
+  //   return distance < 0.1 && angleDiff < 5; // within 10cm and 5 degrees
+  // });
+}
+
+/**
+ * Helper method to get a tag's pose from the field layout
+ */
+private Optional<Pose2d> getTagPose(int tagId) {
+  Optional<AprilTag> tag = fieldLayout.getTagPose(tagId)
+    .map(pose3d -> new AprilTag(tagId, pose3d));
+ 
+  if (tag.isPresent()) {
+    return Optional.of(tag.get().pose.toPose2d());
+  }
+ 
+  return Optional.empty();
 }
 
 }
