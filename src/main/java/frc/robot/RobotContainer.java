@@ -36,16 +36,6 @@ public class RobotContainer {
   private final CommandXboxController m_driverController =
       new CommandXboxController(1);
 
-  //private final Pose2d TAG_10_TARGET = RobotContainer.this.drivebase.getTargetForTag10();
-
-  private static final Pose2d TAG_15_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
-
-  private static final Pose2d TAG_26_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
-
-  private static final Pose2d TAG_31_TARGET = new Pose2d(1.0, 1.0, Rotation2d.fromDegrees(0));
-
-
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
@@ -106,6 +96,8 @@ public class RobotContainer {
     
     // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
 
+
+    // CHANGE TO ONTRUE FROM WHILETRUE LATER
     m_driverController.rightBumper().and(new Trigger(() -> drivebase.seesTag(10))).
     whileTrue(drivebase.alignToOffset(1, 0.50, 180, 10));
 
