@@ -5,24 +5,24 @@
     "front": -12.25,
     "left": 12.25
   },
-  "absoluteEncoderOffset": 21.53,
+  "absoluteEncoderOffset": 100.53,
   "drive": {
     "type": "sparkmax_neo",
-    "id": 7,
+    "id": 8,
     "canbus": null
   },
   "angle": {
     "type": "sparkmax_neo",
-    "id": 3,
+    "id": 7,
     "canbus": null
   },
   "inverted": {
     "angle": true,
-    "drive": true
+    "drive": false
   },
   "encoder": {
     "type": "cancoder",
-    "id": 23,
+    "id": 24,
     "canbus": "rio"
   },
   "absoluteEncoderInverted": false

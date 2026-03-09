@@ -5,6 +5,8 @@ import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -32,6 +34,11 @@ public class RobotContainer {
 
   public final SwerveSubsystem drivebase = new SwerveSubsystem();
   public final VisionSubsystem vision = new VisionSubsystem();
+  public final Intake intake = new Intake();
+  public final Indexer indexer = new Indexer();
+
+  public final Superstructure superstructure = new Superstructure(intake, indexer);
+
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
       new CommandXboxController(1);
@@ -97,18 +104,28 @@ public class RobotContainer {
     // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
 
 
-    // CHANGE TO ONTRUE FROM WHILETRUE LATER
-    m_driverController.rightBumper().and(new Trigger(() -> drivebase.seesTag(10))).
-    whileTrue(drivebase.alignToOffset(1, 0.50, 180, 10));
+    // CHANGE TO ONTRUE FROM WHILETRUE LATER - latest
+    // m_driverController.rightBumper().and(new Trigger(() -> drivebase.seesTag(10))).
+    // whileTrue(drivebase.alignToOffset(1, 0.50, 180, 10));
 
-    m_driverController.leftBumper().and(new Trigger(() -> drivebase.seesTag(15))).
-    whileTrue(drivebase.alignToOffset(0.25, 0, 0, 15));
+    // m_driverController.leftBumper().and(new Trigger(() -> drivebase.seesTag(15))).
+    // whileTrue(drivebase.alignToOffset(0.25, 0, 0, 15));
 
-    m_driverController.a().and(new Trigger(() -> drivebase.seesTag(26))).
-    whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
+    // m_driverController.a().and(new Trigger(() -> drivebase.seesTag(26))).
+    // whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
 
-    m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).
-    whileTrue(drivebase.alignToOffset(0.25, 0, 180, 31));
+    // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).
+    // whileTrue(drivebase.alignToOffset(0.25, 0, 180, 31));
+
+    m_driverController.a().whileTrue(superstructure.jogRoller(0.6));
+    m_driverController.b().whileTrue(superstructure.jogRoller(-0.6));
+
+    m_driverController.rightBumper().whileTrue(superstructure.jogExtension(0.2));
+    m_driverController.leftBumper().whileTrue(superstructure.jogExtension(-0.2));
+
+    //m_driverController.x().whileTrue(superstructure.jogIndexer(0.8));
+    //m_driverController.y().whileTrue(superstructure.jogIndexer(-0.8));
+
   }
 
   /**

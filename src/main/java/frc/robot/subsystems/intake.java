@@ -1,5 +1,3 @@
-
-
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -8,85 +6,93 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import edu.wpi.first.math.controller.PIDController;
 
-public class intake extends SubsystemBase{
-  private final SparkMax leader_left_;
-  
-  private final SparkMaxConfig leader_left_config_ = new SparkMaxConfig();
-  private final SparkMax leader_right_;
-  private final SparkMaxConfig leader_right_config_ = new SparkMaxConfig();
+public class Intake extends SubsystemBase {
+
+  // Roller motor 
+  private final SparkMax roller_;
+
+  // Extension motor
+  private final SparkMax extension_;
 
   private final PeriodicIO io_ = new PeriodicIO();
 
-  private final PIDController controller_ = new PIDController(Constants.kP, 0, 0);
+  public Intake() {
 
-  // Constructor
-  public intake() {
-    // Initialize motor controllers
-    leader_left_ = new SparkMax(Constants.kLeaderLeftId, kBrushless);
-    leader_left_.configure(leader_left_config_, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    leader_left_config_.voltageCompensation(12);
-    leader_left_config_.smartCurrentLimit(20);
-    leader_left_config_.inverted(true);
-    leader_left_config_.idleMode(IdleMode.kBrake);
+    // Roller
+    SparkMaxConfig roller_config = new SparkMaxConfig();
+    roller_config.voltageCompensation(12);
+    roller_config.smartCurrentLimit(20);
+    roller_config.inverted(false);
+    roller_config.idleMode(IdleMode.kBrake);
 
-    leader_right_ = new SparkMax(Constants.kLeaderRightId, kBrushless);
-    leader_right_.configure(leader_left_config_, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    leader_right_config_.voltageCompensation(12);
-    leader_right_config_.smartCurrentLimit(20);
-    leader_right_config_.inverted(true);
-    leader_right_config_.idleMode(IdleMode.kBrake);
-    
+    roller_ = new SparkMax(Constants.kRollerId, kBrushless);
+    roller_.configure(roller_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // Extension 
+    SparkMaxConfig extension_config = new SparkMaxConfig();
+    extension_config.voltageCompensation(12);
+    extension_config.smartCurrentLimit(20);
+    extension_config.inverted(false);
+    extension_config.idleMode(IdleMode.kBrake);
+
+    extension_ = new SparkMax(Constants.kExtensionId, kBrushless);
+    extension_.configure(extension_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // Read inputs
-    io_.current_left_ = leader_left_.getOutputCurrent();
-    //io_.current_right_ = leader_right_.getOutputCurrent();
-    leader_left_.set(io_.left_demand);
-    //leader_right_.set(io_.right_demand);
+    io_.current_roller_    = roller_.getOutputCurrent();
+    io_.current_extension_ = extension_.getOutputCurrent();
+
+    // Write outputs
+    roller_.set(io_.roller_demand_);
+    extension_.set(io_.extension_demand_);
   }
 
-  public void setPercent (double value) {
-    io_.left_demand = value;
-    io_.right_demand = value;
+  /** Spin the roller at a given percent output [-1, 1] */
+  public void setRollerPercent(double value) {
+    io_.roller_demand_ = value;
   }
 
-  public void stopMotor() {
-    io_.left_demand = 0;
-    io_.right_demand = 0;
+  /** Drive the extension motor at a given percent output [-1, 1] */
+  public void setExtensionPercent(double value) {
+    io_.extension_demand_ = value;
   }
 
-  public double getLeftOutputCurrent() {
-    return io_.current_left_;
+  /** Stop all motors */
+  public void stopAll() {
+    io_.roller_demand_    = 0;
+    io_.extension_demand_ = 0;
   }
 
-  public double getRightOutputCurrent() {
-    return io_.current_right_;
+  /** Stop only the roller */
+  public void stopRoller() {
+    io_.roller_demand_ = 0;
   }
+
+  /** Stop only the extension motor */
+  public void stopExtension() {
+    io_.extension_demand_ = 0;
+  }
+
+  public double getRollerCurrent()    { return io_.current_roller_;    }
+  public double getExtensionCurrent() { return io_.current_extension_; }
 
   public static class PeriodicIO {
-    // Input
-    double current_left_;
-    double current_right_;
+    // Inputs
+    double current_roller_;
+    double current_extension_;
 
-    // Output
-    double left_demand;
-    double right_demand;
+    // Outputs
+    double roller_demand_;
+    double extension_demand_;
   }
 
   public static class Constants {
-    //Motor Controllers
-    public static final int kLeaderLeftId = 11;
-    public static final int kLeaderRightId = 12;
-    //public static final int kLeaderRightId = 1;
-
-    // PID Constants
-    public static final double kP = 0.8;
+    public static final int kRollerId    = 9;
+    public static final int kExtensionId = 10;
   }
-
 }
