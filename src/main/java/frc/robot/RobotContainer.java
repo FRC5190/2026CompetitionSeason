@@ -3,10 +3,12 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.Autos;
 import frc.robot.commands.ExampleCommand;
+import frc.robot.commands.ShootOnTheMove;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.VisionSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -15,11 +17,13 @@ import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 
 /**
@@ -36,8 +40,15 @@ public class RobotContainer {
   public final VisionSubsystem vision = new VisionSubsystem();
   public final Intake intake = new Intake();
   public final Indexer indexer = new Indexer();
+  public final Turret turret = new Turret();
 
-  public final Superstructure superstructure = new Superstructure(intake, indexer);
+   // Blue alliance tag
+    private final Pose2d blue_target_ = new Pose2d(new Translation2d(0.0, 5.5), new Rotation2d());
+
+    // Red alliance tag
+    private final Pose2d red_target_  = new Pose2d(new Translation2d(16.54, 5.5), new Rotation2d());
+
+  public final Superstructure superstructure = new Superstructure(intake, indexer, turret);
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController =
@@ -83,27 +94,6 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
 
-    //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goToPose(TAG_10_TARGET));
-
-    //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goToPose(TAG_10_TARGET));
-    // m_driverController.a()
-    // .and(new Trigger(() -> drivebase.seesTag(10)))
-    // .onTrue(drivebase.goToTagWithOffset(10,
-    //     Units.feetToMeters(1.0),
-    //     Units.feetToMeters(0),
-    //     Rotation2d.fromDegrees(180)
-    // ));
-
-    //m_driverController.a().and(new Trigger(() -> drivebase.seesTag(10))).onTrue(drivebase.goTagRelative(10, 1.0, 0.0, 0.0));
-
-
-    // m_driverController.b().and(new Trigger(() -> drivebase.seesTag(15))).onTrue(drivebase.goToPose(TAG_15_TARGET));
-
-    // m_driverController.x().and(new Trigger(() -> drivebase.seesTag(26))).onTrue(drivebase.goToPose(TAG_26_TARGET));
-    
-    // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).onTrue(drivebase.goToPose(TAG_31_TARGET));
-
-
     // CHANGE TO ONTRUE FROM WHILETRUE LATER - latest
     // m_driverController.rightBumper().and(new Trigger(() -> drivebase.seesTag(10))).
     // whileTrue(drivebase.alignToOffset(1, 0.50, 180, 10));
@@ -126,7 +116,17 @@ public class RobotContainer {
     //m_driverController.x().whileTrue(superstructure.jogIndexer(0.8));
     //m_driverController.y().whileTrue(superstructure.jogIndexer(-0.8));
 
+    m_driverController.leftTrigger().whileTrue(new ShootOnTheMove(turret, drivebase, vision, getShootTarget()));
+
   }
+
+  private Pose2d getShootTarget() {
+    if (DriverStation.getAlliance().isPresent() && 
+        DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+        return red_target_;
+    }
+    return blue_target_;
+}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

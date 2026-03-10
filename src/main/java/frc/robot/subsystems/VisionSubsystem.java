@@ -7,6 +7,7 @@ public class VisionSubsystem extends SubsystemBase {
   private static final String kLL = "limelight"; // change if you renamed in LL UI
 
   private double tx = 0.0;
+  private double ty = 0.0;
   private int closestTagID = -1;
   private boolean hasTag = false;
 
@@ -20,6 +21,7 @@ public class VisionSubsystem extends SubsystemBase {
 
     // Horizontal offset (degrees)
     tx = LimelightHelpers.getTX(kLL);
+    ty = LimelightHelpers.getTY(kLL);
 
     // If you want: force validity from tagId instead
     if (closestTagID < 0) {
@@ -30,6 +32,7 @@ public class VisionSubsystem extends SubsystemBase {
   }
 
   public double getTX() { return tx; }
+  public double getTY() { return ty; }
   public int getClosestTagID() { return closestTagID; }
   public boolean hasTag() { return hasTag; }
 }
