@@ -135,6 +135,11 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
-    return drivebase.getAutonomousCommand("Taxi Auto Suhaan");
+    //return drivebase.getAutonomousCommand("Taxi Auto Suhaan");
+
+    Command pathCommand = drivebase.getAutonomousCommand("ScoreLeftSideAuto");
+    Command shootCommand = ShootAuto.shoot(turret, indexer, vision);
+
+    return Commands.sequence(pathCommand, shootCommand);
   }
 }
