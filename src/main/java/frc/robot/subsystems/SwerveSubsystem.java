@@ -9,7 +9,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import java.io.File;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
@@ -43,6 +42,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final AprilTagFieldLayout fieldLayout;
   private final Field2d field2d = new Field2d();
   private static final String kLL = "limelight"; // change if you renamed in LL UI
+  private boolean visionPoseValid_ = false;
 
 
 
@@ -54,7 +54,6 @@ public class SwerveSubsystem extends SubsystemBase {
       SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
       swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.maximumSpeed, new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
       fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
-      SmartDashboard.putData("Field", field2d);
 
       // Alternative method if you don't want to supply the conversion factor via JSON files.
       // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
@@ -95,22 +94,12 @@ public class SwerveSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
-    if (llEst != null) {
-      System.out.println("LL Tags: " + llEst.tagCount + " Pose: " + llEst.pose.getX() + ", " + llEst.pose.getY());
-      if (llEst.tagCount > 0) {
-        swerveDrive.addVisionMeasurement(llEst.pose, llEst.timestampSeconds);
-        System.out.println("FUSED Vision");
-      }
+    visionPoseValid_ = llEst != null && llEst.tagCount > 0;
+    if (visionPoseValid_) {
+      swerveDrive.addVisionMeasurement(llEst.pose, llEst.timestampSeconds);
     }
 
     field2d.setRobotPose(swerveDrive.getPose());
-    //System.out.println("Swerve Pose: " + swerveDrive.getPose());
-    SmartDashboard.putData("Field", field2d);
-
-
-    Pose2d pose = swerveDrive.getPose();
-    System.out.println("Robot POSE: X= " + swerveDrive.getPose());
-    System.out.println("test");
   }
 
   @Override
@@ -119,9 +108,15 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public SwerveDrive getSwerveDrive() {
-    // TODO Auto-generated method stub
-
     return swerveDrive;
+  }
+
+  public Field2d getField() {
+    return field2d;
+  }
+
+  public boolean isVisionPoseValid() {
+    return visionPoseValid_;
   }
 
   public void driveFieldOriented(ChassisSpeeds velocity){
@@ -171,11 +166,7 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command getAutonomousCommand(String pathName) {
-    // TODO Auto-generated method stub
-
-
     return new PathPlannerAuto(pathName);
-
   }
 
   //   public void resetOdometry(Pose2d pose) {

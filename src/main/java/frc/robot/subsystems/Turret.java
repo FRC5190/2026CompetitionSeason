@@ -10,7 +10,6 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Turret extends SubsystemBase {
@@ -166,14 +165,6 @@ public class Turret extends SubsystemBase {
     flywheel_leader_.set(io_.flywheel_output_);
     hood_.set(io_.hood_output_);
     rotation_.set(io_.rotation_output_);
-
-    SmartDashboard.putNumber("Flywheel Output", io_.flywheel_output_);
-    SmartDashboard.putNumber("Hood Position", io_.hood_position_);
-    SmartDashboard.putNumber("Hood Target", io_.hood_target_);
-    SmartDashboard.putNumber("Rotation Position", io_.rotation_position_);
-    SmartDashboard.putNumber("Rotation Target", io_.rotation_target_);
-    SmartDashboard.putBoolean("Hood At Target", isHoodAtTarget());
-    SmartDashboard.putBoolean("Rotation At Target", isRotationAtTarget());
   }
 
   // Flywheel
@@ -187,6 +178,10 @@ public class Turret extends SubsystemBase {
 
   public double getFlywheelPercent() {
     return io_.flywheel_output_;
+  }
+
+  public double getFlywheelDemand() {
+    return io_.flywheel_demand_;
   }
 
   public double getFlywheelLeaderVelocity() {
