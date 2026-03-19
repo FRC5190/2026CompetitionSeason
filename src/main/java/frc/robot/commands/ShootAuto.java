@@ -7,14 +7,14 @@ import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class ShootAuto {
-    public static Command shoot(Turret turret, Indexer indexer){
+    public static Command shoot(Turret turret, Indexer indexer, VisionSubsystem vision){
 
         //double turretTarget = 0.0; //adjust this value based on where goal is
 
         return Commands.sequence(
 
             // align turret with AprilTag
-            new AlignTurretToTag(turret, vision).withTimout(2.5),
+            new AlignTurretToTag(turret, vision).withTimeout(2.5),
 
             // spin flywheel
             Commands.runOnce(() -> turret.setFlywheelPercent(10.0)),
@@ -30,6 +30,6 @@ public class ShootAuto {
                 turret.stopFlywheel();
             })
 
-        )
+        );
     }
 }

@@ -245,14 +245,14 @@ public class Turret extends SubsystemBase {
         // Hood PID
         public static final double kHoodP         = 0.05;
         public static final double kHoodI         = 0.0;
-        public static final double kHoodD         = 0.001;
+        public static final double kHoodD         = 0.0;
         public static final double kHoodTolerance = 0.5;
         public static final double kMaxHoodOutput = 0.4;
 
         // Rotation PID
         public static final double kRotationP         = 0.05;
         public static final double kRotationI         = 0.0;
-        public static final double kRotationD         = 0.001;
+        public static final double kRotationD         = 0.0;
         public static final double kRotationTolerance = 0.5;
         public static final double kMaxRotationOutput = 0.5;
     }
