@@ -1,5 +1,6 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Seconds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -24,7 +25,8 @@ public class Superstructure {
   public Command setExtensionPosition(double position) {
     return new RunCommand(() -> intake_.setExtensionPosition(position), intake_)
         .until(() -> intake_.isExtensionAtTarget())
-        .andThen(new InstantCommand(() -> intake_.stopExtension()));
+        .andThen(new InstantCommand(() -> intake_.stopExtension()))
+        .withTimeout(Seconds.of(2));
   }
 
   // Roller jog
