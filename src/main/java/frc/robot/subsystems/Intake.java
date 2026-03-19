@@ -10,7 +10,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class Intake extends SubsystemBase {
 
-  // Roller motor 
+  // Roller motor
   private final SparkMax roller_;
 
   // Extension motor
@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
     roller_ = new SparkMax(Constants.kRollerId, kBrushless);
     roller_.configure(roller_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    // Extension 
+    // Extension
     SparkMaxConfig extension_config = new SparkMaxConfig();
     extension_config.voltageCompensation(12);
     extension_config.smartCurrentLimit(20);

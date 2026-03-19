@@ -24,7 +24,8 @@ public class Indexer extends SubsystemBase {
     indexer_config.idleMode(IdleMode.kBrake);
 
     indexer_ = new SparkMax(Constants.kIndexerId, kBrushless);
-    indexer_.configure(indexer_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    indexer_.configure(indexer_config, ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
   }
 
   @Override
@@ -46,7 +47,9 @@ public class Indexer extends SubsystemBase {
     io_.indexer_demand_ = 0;
   }
 
-  public double getIndexerCurrent() { return io_.current_indexer_; }
+  public double getIndexerCurrent() {
+    return io_.current_indexer_;
+  }
 
   public static class PeriodicIO {
     // Inputs

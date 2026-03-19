@@ -7,29 +7,27 @@ import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class ShootAuto {
-    public static Command shoot(Turret turret, Indexer indexer, VisionSubsystem vision){
+  public static Command shoot(Turret turret, Indexer indexer, VisionSubsystem vision) {
 
-        //double turretTarget = 0.0; //adjust this value based on where goal is
+    // double turretTarget = 0.0; //adjust this value based on where goal is
 
-        return Commands.sequence(
+    return Commands.sequence(
 
-            // align turret with AprilTag
-            new AlignTurretToTag(turret, vision).withTimeout(2.5),
+        // align turret with AprilTag
+        new AlignTurretToTag(turret, vision).withTimeout(2.5),
 
-            // spin flywheel
-            Commands.runOnce(() -> turret.setFlywheelPercent(10.0)),
-            Commands.waitSeconds(2.0),
+        // spin flywheel
+        Commands.runOnce(() -> turret.setFlywheelPercent(10.0)), Commands.waitSeconds(2.0),
 
-            // feed fuel
-            Commands.runOnce(() -> indexer.setPercent(0.8)),
-            Commands.waitSeconds(1.5),
+        // feed fuel
+        Commands.runOnce(() -> indexer.setPercent(0.8)), Commands.waitSeconds(1.5),
 
-            // stop motors
-            Commands.runOnce(() -> {
-                indexer.stop();
-                turret.stopFlywheel();
-            })
+        // stop motors
+        Commands.runOnce(() -> {
+          indexer.stop();
+          turret.stopFlywheel();
+        })
 
-        );
-    }
+    );
+  }
 }

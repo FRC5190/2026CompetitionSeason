@@ -1,4 +1,10 @@
 {
+  "java.format.settings.url": "https://raw.githubusercontent.com/google/styleguide/gh-pages/eclipse-java-google-style.xml",
+  "java.format.settings.profile": "GoogleStyle",
+  "[java]": {
+      "editor.defaultFormatter": "redhat.java",
+      "editor.formatOnSave": true
+  },
   "java.configuration.updateBuildConfiguration": "automatic",
   "java.server.launchMode": "Standard",
   "files.exclude": {

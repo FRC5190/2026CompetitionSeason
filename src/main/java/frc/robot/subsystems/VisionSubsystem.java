@@ -28,11 +28,22 @@ public class VisionSubsystem extends SubsystemBase {
       hasTag = false;
     }
 
-    //System.out.println("LL hasTag=" + hasTag + " id= " + closestTagID + " tx = " + tx);
+    // System.out.println("LL hasTag=" + hasTag + " id= " + closestTagID + " tx = " + tx);
   }
 
-  public double getTX() { return tx; }
-  public double getTY() { return ty; }
-  public int getClosestTagID() { return closestTagID; }
-  public boolean hasTag() { return hasTag; }
+  public double getTX() {
+    return tx;
+  }
+
+  public double getTY() {
+    return ty;
+  }
+
+  public int getClosestTagID() {
+    return closestTagID;
+  }
+
+  public boolean hasTag() {
+    return hasTag;
+  }
 }
