@@ -157,6 +157,22 @@ public class Intake extends SubsystemBase {
     return io_.current_extension_position_;
   }
 
+  public double getRollerVelocity() {
+    return io_.current_roller_velocity_;
+  }
+
+  public double getRollerDemand() {
+    return io_.roller_demand_;
+  }
+
+  public double getExtensionDemand() {
+    return io_.extension_demand_;
+  }
+
+  public double getExtensionTarget() {
+    return io_.extension_target_;
+  }
+
   public boolean isExtensionAtTarget() {
     return output_type_ != OutputType.PERCENT && extension_pid_.atSetpoint();
   }

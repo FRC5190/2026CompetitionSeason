@@ -46,4 +46,17 @@ public class VisionSubsystem extends SubsystemBase {
   public boolean hasTag() {
     return hasTag;
   }
+
+  public double getTargetDistanceMeters() {
+    if (!hasTag) {
+      return -1.0;
+    }
+
+    double[] targetPose = LimelightHelpers.getBotPose_TargetSpace(kLL);
+    if (targetPose == null || targetPose.length < 3) {
+      return -1.0;
+    }
+
+    return Math.hypot(targetPose[0], targetPose[2]);
+  }
 }

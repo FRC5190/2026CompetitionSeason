@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -36,6 +37,7 @@ public class RobotContainer {
   public final Intake intake = new Intake();
   public final Indexer indexer = new Indexer();
   public final Turret turret = new Turret();
+  private final SendableChooser<String> autonomousChooser = new SendableChooser<>();
 
   // Blue alliance tag
   private final Pose2d blue_target_ = new Pose2d(new Translation2d(0.0, 5.5), new Rotation2d());
@@ -51,6 +53,7 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    configureAutos();
     // Configure the trigger bindings
     configureBindings();
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
@@ -115,6 +118,13 @@ public class RobotContainer {
 
   }
 
+  private void configureAutos() {
+    autonomousChooser.setDefaultOption("ScoreLeftSideAuto", "ScoreLeftSideAuto");
+    autonomousChooser.addOption("ScoreRightSideAuto", "ScoreRightSideAuto");
+    autonomousChooser.addOption("ScoreIntakeScore", "ScoreIntakeScore");
+    autonomousChooser.addOption("Simple Auto", "Simple Auto");
+  }
+
   private Pose2d getShootTarget() {
     if (DriverStation.getAlliance().isPresent()
         && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
@@ -129,12 +139,26 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
-    // return drivebase.getAutonomousCommand("Taxi Auto Suhaan");
-
-    Command pathCommand = drivebase.getAutonomousCommand("ScoreLeftSideAuto");
+    String autoName = getResolvedAutoName();
+    Command pathCommand = drivebase.getAutonomousCommand(autoName);
     Command shootCommand = ShootAuto.shoot(turret, indexer, vision);
 
-    return Commands.sequence(pathCommand, shootCommand);
+    return Commands.sequence(pathCommand, shootCommand).withName("Auto: " + autoName);
+  }
+
+  public SendableChooser<String> getAutonomousChooser() {
+    return autonomousChooser;
+  }
+
+  public String getSelectedAutoName() {
+    return autonomousChooser.getSelected();
+  }
+
+  public String getResolvedAutoName() {
+    String selectedAuto = autonomousChooser.getSelected();
+    if (selectedAuto == null || selectedAuto.isBlank()) {
+      return "ScoreLeftSideAuto";
+    }
+    return selectedAuto;
   }
 }
