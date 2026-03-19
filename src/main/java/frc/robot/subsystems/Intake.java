@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -28,7 +28,8 @@ public class Intake extends SubsystemBase {
     roller_config.idleMode(IdleMode.kBrake);
 
     roller_ = new SparkMax(Constants.kRollerId, kBrushless);
-    roller_.configure(roller_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    roller_.configure(roller_config, ResetMode.kResetSafeParameters,
+        PersistMode.kNoPersistParameters);
 
     // Extension
     SparkMaxConfig extension_config = new SparkMaxConfig();
@@ -38,13 +39,14 @@ public class Intake extends SubsystemBase {
     extension_config.idleMode(IdleMode.kBrake);
 
     extension_ = new SparkMax(Constants.kExtensionId, kBrushless);
-    extension_.configure(extension_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    extension_.configure(extension_config, ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // Read inputs
-    io_.current_roller_    = roller_.getOutputCurrent();
+    io_.current_roller_ = roller_.getOutputCurrent();
     io_.current_extension_ = extension_.getOutputCurrent();
 
     // Write outputs
@@ -64,7 +66,7 @@ public class Intake extends SubsystemBase {
 
   /** Stop all motors */
   public void stopAll() {
-    io_.roller_demand_    = 0;
+    io_.roller_demand_ = 0;
     io_.extension_demand_ = 0;
   }
 
@@ -78,8 +80,13 @@ public class Intake extends SubsystemBase {
     io_.extension_demand_ = 0;
   }
 
-  public double getRollerCurrent()    { return io_.current_roller_;    }
-  public double getExtensionCurrent() { return io_.current_extension_; }
+  public double getRollerCurrent() {
+    return io_.current_roller_;
+  }
+
+  public double getExtensionCurrent() {
+    return io_.current_extension_;
+  }
 
   public static class PeriodicIO {
     // Inputs
@@ -92,7 +99,7 @@ public class Intake extends SubsystemBase {
   }
 
   public static class Constants {
-    public static final int kRollerId    = 9;
+    public static final int kRollerId = 9;
     public static final int kExtensionId = 10;
   }
 }
