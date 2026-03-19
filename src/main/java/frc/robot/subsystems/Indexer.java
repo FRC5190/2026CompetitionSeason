@@ -19,9 +19,9 @@ public class Indexer extends SubsystemBase {
     // Indexer
     SparkMaxConfig indexer_config = new SparkMaxConfig();
     indexer_config.voltageCompensation(12);
-    indexer_config.smartCurrentLimit(20);
+    indexer_config.smartCurrentLimit(Constants.kCurrentLimit);
     indexer_config.inverted(false);
-    indexer_config.idleMode(IdleMode.kBrake);
+    indexer_config.idleMode(IdleMode.kCoast);
 
     indexer_ = new SparkMax(Constants.kIndexerId, kBrushless);
     indexer_.configure(indexer_config, ResetMode.kResetSafeParameters,
@@ -51,6 +51,10 @@ public class Indexer extends SubsystemBase {
     return io_.current_indexer_;
   }
 
+  public double getIndexerPercent() {
+    return io_.indexer_demand_;
+  }
+
   public static class PeriodicIO {
     // Inputs
     double current_indexer_;
@@ -61,5 +65,6 @@ public class Indexer extends SubsystemBase {
 
   public static class Constants {
     public static final int kIndexerId = 11;
+    public static final int kCurrentLimit = 20; // Keep between [20, 40]
   }
 }
