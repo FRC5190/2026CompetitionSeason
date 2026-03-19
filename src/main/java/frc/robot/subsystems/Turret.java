@@ -2,6 +2,10 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
 import com.revrobotics.PersistMode;
 import com.revrobotics.spark.SparkMax;
@@ -29,6 +33,14 @@ public class Turret extends SubsystemBase {
   private final PIDController rotation_pid_;
 
   private final PeriodicIO io_ = new PeriodicIO();
+
+  // --- Simulation ---
+  private final DCMotorSim rotation_sim_ = new DCMotorSim(
+      LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.001, Constants.ROTATION_GEAR_RATIO),
+      DCMotor.getNEO(1));
+  private final DCMotorSim hood_sim_ = new DCMotorSim(
+      LinearSystemId.createDCMotorSystem(DCMotor.getNEO(1), 0.001, Constants.HOOD_GEAR_RATIO),
+      DCMotor.getNEO(1));
 
   public enum ControlMode {
     MANUAL, PID
@@ -68,6 +80,9 @@ public class Turret extends SubsystemBase {
     hood_config.smartCurrentLimit(20);
     hood_config.inverted(false);
     hood_config.idleMode(IdleMode.kBrake);
+    hood_config.encoder
+        .positionConversionFactor(360.0 / Constants.HOOD_GEAR_RATIO)
+        .velocityConversionFactor(360.0 / Constants.HOOD_GEAR_RATIO / 60.0);
 
     hood_ = new SparkMax(Constants.kHoodId, kBrushless);
     hood_.configure(hood_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -80,6 +95,9 @@ public class Turret extends SubsystemBase {
     rotation_config.smartCurrentLimit(40);
     rotation_config.inverted(false);
     rotation_config.idleMode(IdleMode.kBrake);
+    rotation_config.encoder
+        .positionConversionFactor(360.0 / Constants.ROTATION_GEAR_RATIO)
+        .velocityConversionFactor(360.0 / Constants.ROTATION_GEAR_RATIO / 60.0);
 
     rotation_ = new SparkMax(Constants.kRotationId, kBrushless);
     rotation_.configure(rotation_config, ResetMode.kResetSafeParameters,
@@ -234,6 +252,22 @@ public class Turret extends SubsystemBase {
     double rotation_target_;
   }
 
+  // --- Simulation ---
+  @Override
+  public void simulationPeriodic() {
+    rotation_sim_.setInputVoltage(
+        io_.rotation_demand_ * RobotController.getBatteryVoltage());
+    rotation_sim_.update(0.02);
+    rotation_encoder_.setPosition(
+        rotation_sim_.getAngularPositionRotations() * 360.0);
+
+    hood_sim_.setInputVoltage(
+        io_.hood_demand_ * RobotController.getBatteryVoltage());
+    hood_sim_.update(0.02);
+    hood_encoder_.setPosition(
+        hood_sim_.getAngularPositionRotations() * 360.0);
+  }
+
   public static class Constants {
     // CAN IDs
     public static final int kFlywheelLeaderId = 14; // Set to your actual CAN ID
@@ -241,13 +275,18 @@ public class Turret extends SubsystemBase {
     public static final int kHoodId = 16; // Set to your actual CAN ID
     public static final int kRotationId = 17; // Set to your actual CAN ID
 
-    // Hood soft limits (in encoder rotations, tune to your robot)
-    public static final double kMinHoodPosition = 0.0;
-    public static final double kMaxHoodPosition = 20.0;
+    // Gear ratios — MUST be set before deploying to real hardware!
+    // WARNING: These are placeholders. Set to your actual gear ratios!
+    public static final double ROTATION_GEAR_RATIO = 1.0; // TODO: MUST set before real robot use
+    public static final double HOOD_GEAR_RATIO = 1.0;     // TODO: MUST set before real robot use
 
-    // Rotation soft limits (in encoder rotations, tune to your robot)
-    public static final double kMinRotationPosition = -10.0;
-    public static final double kMaxRotationPosition = 10.0;
+    // Hood soft limits (degrees)
+    public static final double kMinHoodPosition = 0.0;
+    public static final double kMaxHoodPosition = 90.0;
+
+    // Rotation soft limits (degrees)
+    public static final double kMinRotationPosition = -180.0;
+    public static final double kMaxRotationPosition = 180.0;
 
     // Hood PID
     public static final double kHoodP = 0.05;

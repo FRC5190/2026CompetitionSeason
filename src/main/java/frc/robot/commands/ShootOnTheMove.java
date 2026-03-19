@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret;
 import frc.robot.LimelightHelpers;
@@ -52,7 +53,7 @@ public class ShootOnTheMove extends Command {
       shooter_table_.put(entry.getFirst(), entry.getSecond());
     }
 
-    addRequirements(turret_, drivebase_);
+    addRequirements(turret_);
   }
 
   @Override
@@ -98,7 +99,8 @@ public class ShootOnTheMove extends Command {
           new Translation2d(robot_speed.vxMetersPerSecond, robot_speed.vyMetersPerSecond);
 
       // Convert tx to a unit vector and scale by ideal speed, then subtract robot velocity
-      double tx_radians = Math.toRadians(vision_.getTX());
+      double tx_radians = Math.toRadians(vision_.getTX())
+          + Math.toRadians(turret_.getRotationPosition());
       Translation2d shot_vec =
           new Translation2d(Math.cos(tx_radians) * ideal_flywheel_percent * kTotalExitVelocity,
               Math.sin(tx_radians) * ideal_flywheel_percent * kTotalExitVelocity)
@@ -127,6 +129,21 @@ public class ShootOnTheMove extends Command {
     turret_.setRotationPosition(turret_angle);
     turret_.setHoodPosition(new_pitch);
     turret_.setFlywheelPercent(ideal_flywheel_percent);
+
+    // --- AdvantageScope logging ---
+    SmartDashboard.putNumberArray("Turret/FieldPose", new double[] {
+        drivebase_.getSwerveDrive().getPose().getX(),
+        drivebase_.getSwerveDrive().getPose().getY(),
+        Math.toRadians(turret_angle)
+    });
+    SmartDashboard.putNumberArray("Hub/FieldPose", new double[] {
+        goal_pose_.getX(),
+        goal_pose_.getY(),
+        0.0
+    });
+    SmartDashboard.putNumber("SOTM/TurretAngle", turret_angle);
+    SmartDashboard.putNumber("SOTM/Distance", dist);
+    SmartDashboard.putNumber("SOTM/HoodAngle", new_pitch);
   }
 
   /**
