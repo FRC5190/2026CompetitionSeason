@@ -4,20 +4,18 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.SwerveSubsystem;
-import edu.wpi.first.wpilibj.Timer;
 
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
- */
+* The methods in this class are called automatically corresponding to each mode, as described in
+* the TimedRobot documentation. If you change the name of this class or the package after creating
+* this project, you must also update the Main.java file in the project.
+*/
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
@@ -25,26 +23,31 @@ public class Robot extends TimedRobot {
   private static final String kLL = "limelight";
   private double lastPrint = 0.0;
 
-
-  //private SwerveSubsystem drivebase = new SwerveSubsystem();
+  private final DashboardPublisher dashboardPublisher;
 
   /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
+  * This function is run when the robot is first started up and should be used for any
+  * initialization code.
+  */
   public Robot() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+    dashboardPublisher = new DashboardPublisher(m_robotContainer);
+  }
+
+  @Override
+  public void robotInit() {
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
   }
 
   /**
-   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-   * that you want ran during disabled, autonomous, teleoperated and test.
-   *
-   * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-   * SmartDashboard integrated updating.
-   */
+  * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+  * that you want ran during disabled, autonomous, teleoperated and test.
+  *
+  * <p>This runs after the mode specific periodic functions, but before LiveWindow and
+  * SmartDashboard integrated updating.
+  */
   @Override
   public void robotPeriodic() {
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
@@ -52,6 +55,7 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    dashboardPublisher.update();
 
     // ChassisSpeeds speeds = m_robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
     // double omegaRadPerSec = speeds.omegaRadiansPerSecond;
@@ -94,7 +98,7 @@ public class Robot extends TimedRobot {
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
+      CommandScheduler.getInstance().schedule(m_autonomousCommand);
     }
   }
 

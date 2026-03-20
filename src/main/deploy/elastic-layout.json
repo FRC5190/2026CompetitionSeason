@@ -1,0 +1,1016 @@
+{
+  "version": 1.0,
+  "grid_size": 128,
+  "tabs": [
+    {
+      "name": "Match",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Field",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 1152.0,
+            "height": 640.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true,
+              "field_rotation": 0.0,
+              "robot_color": 4294198070,
+              "trajectory_color": 4294967295
+            }
+          },
+          {
+            "title": "Match Time",
+            "x": 1152.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Match Time",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/MatchTime",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Battery",
+            "x": 1408.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/BatteryVoltage",
+              "period": 0.1,
+              "min_value": 8.0,
+              "max_value": 13.0
+            }
+          },
+          {
+            "title": "Mode",
+            "x": 1664.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Mode",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Alliance",
+            "x": 1664.0,
+            "y": 96.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Large Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Alliance",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Alerts",
+            "x": 1152.0,
+            "y": 192.0,
+            "width": 768.0,
+            "height": 224.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Selected Auto",
+            "x": 1152.0,
+            "y": 416.0,
+            "width": 384.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Autos/SelectedName",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Auto Valid",
+            "x": 1536.0,
+            "y": 416.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Autos/SelectedValid",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Has Tag",
+            "x": 1728.0,
+            "y": 416.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/HasTag",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Swerve",
+            "x": 1152.0,
+            "y": 512.0,
+            "width": 768.0,
+            "height": 256.0,
+            "type": "SwerveDrive",
+            "properties": {
+              "topic": "/SmartDashboard/swerve",
+              "period": 0.06,
+              "show_robot_rotation": true
+            }
+          },
+          {
+            "title": "Hood Ready",
+            "x": 0.0,
+            "y": 640.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/HoodAtTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Rotation Ready",
+            "x": 192.0,
+            "y": 640.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/RotationAtTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Flywheel Output",
+            "x": 384.0,
+            "y": 640.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Number Bar",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/FlywheelOutput",
+              "period": 0.1,
+              "min_value": 0.0,
+              "max_value": 1.0
+            }
+          },
+          {
+            "title": "Intake Extension",
+            "x": 768.0,
+            "y": 640.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Number Bar",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/ExtensionPosition",
+              "period": 0.1,
+              "min_value": -0.2,
+              "max_value": 10.0
+            }
+          },
+          {
+            "title": "Tag ID",
+            "x": 1152.0,
+            "y": 768.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TagId",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Target Distance",
+            "x": 1408.0,
+            "y": 768.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TargetDistanceM",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Roller Demand",
+            "x": 1664.0,
+            "y": 768.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/RollerDemand",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Heading",
+            "x": 0.0,
+            "y": 768.0,
+            "width": 320.0,
+            "height": 256.0,
+            "type": "Radial Gauge",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/HeadingDeg",
+              "period": 0.1,
+              "min_value": 0.0,
+              "max_value": 360.0
+            }
+          },
+          {
+            "title": "Linear Speed",
+            "x": 320.0,
+            "y": 768.0,
+            "width": 416.0,
+            "height": 128.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/LinearSpeedMps",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Angular Speed",
+            "x": 320.0,
+            "y": 896.0,
+            "width": 416.0,
+            "height": 128.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/AngularSpeedDegPerSec",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Vision Pose Valid",
+            "x": 736.0,
+            "y": 768.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/VisionPoseValid",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Brownout",
+            "x": 928.0,
+            "y": 768.0,
+            "width": 224.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Brownout",
+              "period": 0.1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Mechanisms",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Extend Intake",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/ExtendIntake",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Retract Intake",
+            "x": 256.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/RetractIntake",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Intake Forward Burst",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/IntakeForwardBurst",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Intake Reverse Burst",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/IntakeReverseBurst",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Indexer Feed Burst",
+            "x": 1024.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/IndexerFeedBurst",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Shooter Stow",
+            "x": 1280.0,
+            "y": 0.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/ShooterStow",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Stop All",
+            "x": 1536.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Command",
+            "properties": {
+              "topic": "/SmartDashboard/Dashboard/Commands/StopAllMechanisms",
+              "period": 0.1,
+              "show_type": false,
+              "maximize_button_space": true
+            }
+          },
+          {
+            "title": "Intake Roller Current",
+            "x": 0.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/RollerCurrent",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Intake Roller Velocity",
+            "x": 384.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/RollerVelocity",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Extension Position",
+            "x": 768.0,
+            "y": 128.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/ExtensionPosition",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Extension Target",
+            "x": 1152.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/ExtensionTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Extension At Target",
+            "x": 1408.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/ExtensionAtTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Indexer Current",
+            "x": 1664.0,
+            "y": 128.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Indexer/Current",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Flywheel Output",
+            "x": 0.0,
+            "y": 320.0,
+            "width": 384.0,
+            "height": 128.0,
+            "type": "Number Bar",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/FlywheelOutput",
+              "period": 0.1,
+              "min_value": 0.0,
+              "max_value": 1.0
+            }
+          },
+          {
+            "title": "Flywheel Leader Velocity",
+            "x": 384.0,
+            "y": 320.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/FlywheelLeaderVelocity",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Flywheel Follower Velocity",
+            "x": 768.0,
+            "y": 320.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/FlywheelFollowerVelocity",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Hood Position",
+            "x": 1152.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/HoodPosition",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Hood Target",
+            "x": 1408.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/HoodTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Hood At Target",
+            "x": 1664.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/HoodAtTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Turret Rotation Position",
+            "x": 0.0,
+            "y": 512.0,
+            "width": 512.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/RotationPosition",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Turret Rotation Target",
+            "x": 512.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/RotationTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Rotation At Target",
+            "x": 768.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/RotationAtTarget",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Extension Current",
+            "x": 1024.0,
+            "y": 512.0,
+            "width": 384.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Intake/ExtensionCurrent",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Indexer Demand",
+            "x": 1408.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Indexer/Demand",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Flywheel Demand",
+            "x": 1664.0,
+            "y": 512.0,
+            "width": 256.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Turret/FlywheelDemand",
+              "period": 0.1
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Auto & Vision",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Auto Chooser",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 192.0,
+            "type": "ComboBox Chooser",
+            "properties": {
+              "topic": "/SmartDashboard/Autos/Chooser",
+              "period": 0.1,
+              "sort_options": false
+            }
+          },
+          {
+            "title": "Selected Auto",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 384.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Autos/SelectedName",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Auto Valid",
+            "x": 896.0,
+            "y": 0.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Autos/SelectedValid",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Command Scheduler",
+            "x": 1088.0,
+            "y": 0.0,
+            "width": 832.0,
+            "height": 320.0,
+            "type": "Command Scheduler",
+            "properties": {
+              "topic": "/SmartDashboard/CommandScheduler",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Field",
+            "x": 0.0,
+            "y": 192.0,
+            "width": 768.0,
+            "height": 512.0,
+            "type": "Field",
+            "properties": {
+              "topic": "/SmartDashboard/Field",
+              "period": 0.06,
+              "field_game": "Rebuilt",
+              "robot_width": 0.85,
+              "robot_length": 0.85,
+              "show_other_objects": true,
+              "show_trajectories": true
+            }
+          },
+          {
+            "title": "Has Tag",
+            "x": 768.0,
+            "y": 320.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/HasTag",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Vision Pose Valid",
+            "x": 960.0,
+            "y": 320.0,
+            "width": 192.0,
+            "height": 128.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/VisionPoseValid",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Tag ID",
+            "x": 1152.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TagId",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Vision Distance",
+            "x": 1408.0,
+            "y": 320.0,
+            "width": 256.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TargetDistanceM",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "TX",
+            "x": 1664.0,
+            "y": 320.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TxDeg",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "TY",
+            "x": 1792.0,
+            "y": 320.0,
+            "width": 128.0,
+            "height": 128.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TyDeg",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Drive Pose X",
+            "x": 768.0,
+            "y": 448.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/PoseX",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Drive Pose Y",
+            "x": 1056.0,
+            "y": 448.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/PoseY",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Heading",
+            "x": 1344.0,
+            "y": 448.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/HeadingDeg",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Linear Speed",
+            "x": 1632.0,
+            "y": 448.0,
+            "width": 288.0,
+            "height": 128.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/LinearSpeedMps",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Swerve",
+            "x": 768.0,
+            "y": 576.0,
+            "width": 576.0,
+            "height": 320.0,
+            "type": "SwerveDrive",
+            "properties": {
+              "topic": "/SmartDashboard/swerve",
+              "period": 0.06,
+              "show_robot_rotation": true
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Systems",
+      "grid_layout": {
+        "layouts": [],
+        "containers": [
+          {
+            "title": "Alerts",
+            "x": 0.0,
+            "y": 0.0,
+            "width": 768.0,
+            "height": 256.0,
+            "type": "Alerts",
+            "properties": {
+              "topic": "/SmartDashboard/Alerts",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Drivebase",
+            "x": 768.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 224.0,
+            "type": "Subsystem",
+            "properties": {
+              "topic": "/SmartDashboard/Subsystems/Drivebase",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Vision",
+            "x": 1056.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 224.0,
+            "type": "Subsystem",
+            "properties": {
+              "topic": "/SmartDashboard/Subsystems/Vision",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Intake",
+            "x": 1344.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 224.0,
+            "type": "Subsystem",
+            "properties": {
+              "topic": "/SmartDashboard/Subsystems/Intake",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Indexer",
+            "x": 1632.0,
+            "y": 0.0,
+            "width": 288.0,
+            "height": 224.0,
+            "type": "Subsystem",
+            "properties": {
+              "topic": "/SmartDashboard/Subsystems/Indexer",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Turret",
+            "x": 768.0,
+            "y": 224.0,
+            "width": 288.0,
+            "height": 224.0,
+            "type": "Subsystem",
+            "properties": {
+              "topic": "/SmartDashboard/Subsystems/Turret",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Battery",
+            "x": 0.0,
+            "y": 256.0,
+            "width": 256.0,
+            "height": 192.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/BatteryVoltage",
+              "period": 0.1,
+              "min_value": 8.0,
+              "max_value": 13.0
+            }
+          },
+          {
+            "title": "Enabled",
+            "x": 256.0,
+            "y": 256.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Enabled",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Brownout",
+            "x": 448.0,
+            "y": 256.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Boolean Box",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Brownout",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Mode",
+            "x": 256.0,
+            "y": 352.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Mode",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Alliance",
+            "x": 448.0,
+            "y": 352.0,
+            "width": 192.0,
+            "height": 96.0,
+            "type": "Text Display",
+            "properties": {
+              "topic": "/SmartDashboard/Robot/Alliance",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Command Scheduler",
+            "x": 0.0,
+            "y": 448.0,
+            "width": 640.0,
+            "height": 384.0,
+            "type": "Command Scheduler",
+            "properties": {
+              "topic": "/SmartDashboard/CommandScheduler",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Drive Speed",
+            "x": 640.0,
+            "y": 448.0,
+            "width": 320.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/LinearSpeedMps",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Angular Speed",
+            "x": 960.0,
+            "y": 448.0,
+            "width": 320.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Drive/AngularSpeedDegPerSec",
+              "period": 0.1
+            }
+          },
+          {
+            "title": "Vision Distance",
+            "x": 1280.0,
+            "y": 448.0,
+            "width": 320.0,
+            "height": 192.0,
+            "type": "Graph",
+            "properties": {
+              "topic": "/SmartDashboard/Vision/TargetDistanceM",
+              "period": 0.1
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

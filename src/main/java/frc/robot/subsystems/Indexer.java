@@ -2,8 +2,8 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
-import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -19,12 +19,13 @@ public class Indexer extends SubsystemBase {
     // Indexer
     SparkMaxConfig indexer_config = new SparkMaxConfig();
     indexer_config.voltageCompensation(12);
-    indexer_config.smartCurrentLimit(20);
+    indexer_config.smartCurrentLimit(Constants.kCurrentLimit);
     indexer_config.inverted(false);
-    indexer_config.idleMode(IdleMode.kBrake);
+    indexer_config.idleMode(IdleMode.kCoast);
 
     indexer_ = new SparkMax(Constants.kIndexerId, kBrushless);
-    indexer_.configure(indexer_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    indexer_.configure(indexer_config, ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
   }
 
   @Override
@@ -46,7 +47,13 @@ public class Indexer extends SubsystemBase {
     io_.indexer_demand_ = 0;
   }
 
-  public double getIndexerCurrent() { return io_.current_indexer_; }
+  public double getIndexerCurrent() {
+    return io_.current_indexer_;
+  }
+
+  public double getIndexerPercent() {
+    return io_.indexer_demand_;
+  }
 
   public static class PeriodicIO {
     // Inputs
@@ -58,5 +65,6 @@ public class Indexer extends SubsystemBase {
 
   public static class Constants {
     public static final int kIndexerId = 11;
+    public static final int kCurrentLimit = 20; // Keep between [20, 40]
   }
 }
