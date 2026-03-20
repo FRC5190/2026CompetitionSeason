@@ -1,12 +1,14 @@
 package frc.robot.subsystems;
 
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
-
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.AbsoluteEncoderConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -29,6 +31,7 @@ public class Turret extends SubsystemBase {
   private final SparkMax rotation_;
   private final RelativeEncoder rotation_encoder_;
   private final PIDController rotation_pid_;
+  private final SparkAbsoluteEncoder bore_encoder_;
 
   // Periodic IO
   private final PeriodicIO io_ = new PeriodicIO();
@@ -85,12 +88,19 @@ public class Turret extends SubsystemBase {
     rotation_config.smartCurrentLimit(Constants.kRotationCurrentLimit);
     rotation_config.inverted(Constants.kRotationInverted);
     rotation_config.idleMode(IdleMode.kBrake);
-    rotation_config.encoder.positionConversionFactor(1.0 / Constants.kRotationGearRatio);
-    rotation_config.encoder.velocityConversionFactor(1.0 / Constants.kRotationGearRatio);
+    rotation_config.encoder.positionConversionFactor(2 * Math.PI / Constants.kRotationGearRatio);
+    rotation_config.encoder.velocityConversionFactor((2 * Math.PI / Constants.kRotationGearRatio) / 60.0);
+    rotation_config.apply(new AbsoluteEncoderConfig()
+      .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2)
+      .positionConversionFactor(2.0 * Math.PI)   // rotations -> radians
+      .velocityConversionFactor((2.0 * Math.PI) / 60.0) // rpm -> rad/s
+      .zeroOffset(Constants.kEncoderOffset));
 
     rotation_ = new SparkMax(Constants.kRotationId, kBrushless);
     rotation_.configure(rotation_config, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+    bore_encoder_ = rotation_.getAbsoluteEncoder();
+
     rotation_encoder_ = rotation_.getEncoder();
     rotation_encoder_.setPosition(Constants.kRotationStartingPosition);
 
@@ -100,6 +110,9 @@ public class Turret extends SubsystemBase {
     rotation_pid_ =
         new PIDController(Constants.kRotationP, Constants.kRotationI, Constants.kRotationD);
     rotation_pid_.setTolerance(Constants.kRotationTolerance);
+
+    // Assign absolute encoder value to rotation encoder
+    resetEncoder();
   }
 
   @Override
@@ -165,6 +178,15 @@ public class Turret extends SubsystemBase {
     flywheel_leader_.set(io_.flywheel_output_);
     hood_.set(io_.hood_output_);
     rotation_.set(io_.rotation_output_);
+  }
+
+  // Absolute encoder
+  public double getEncoderRadians() {
+    return bore_encoder_.getPosition();
+  }
+
+  public void resetEncoder() {
+    rotation_encoder_.setPosition(getEncoderRadians());
   }
 
   // Flywheel
@@ -256,6 +278,10 @@ public class Turret extends SubsystemBase {
     return rotation_output_type_ == OutputType.POSITION && rotation_pid_.atSetpoint();
   }
 
+  /***
+   * Gets the current position of the rotation motor in radians.
+   * @return The current position in radians.
+   */
   public double getRotationPosition() {
     return io_.rotation_position_;
   }
@@ -346,5 +372,6 @@ public class Turret extends SubsystemBase {
     public static final double kRotationD = 0.0;
     public static final double kRotationTolerance = 0.5;
     public static final double kMaxRotationOutput = 0.5;
+    public static final double kEncoderOffset = 0.0; // CHANGE THIS
   }
 }
