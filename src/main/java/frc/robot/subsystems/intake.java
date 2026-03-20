@@ -92,7 +92,7 @@ public class Intake extends SubsystemBase {
   }
 
   public static class Constants {
-    public static final int kRollerId    = 9;
-    public static final int kExtensionId = 10;
+    public static final int kRollerId    = 10;
+    public static final int kExtensionId = 9;
   }
 }
