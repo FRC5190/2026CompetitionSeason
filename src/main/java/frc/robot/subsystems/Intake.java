@@ -100,30 +100,50 @@ public class Intake extends SubsystemBase {
     }
   }
 
-  /** Spin the roller at a given percent output [-1, 1] */
+  /**
+   * Sets the intake roller open-loop output.
+   *
+   * @param value Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public void setRollerPercent(double value) {
     io_.roller_demand_ = value;
   }
 
-  /** Drive the extension motor at a given percent output [-1, 1] */
+  /**
+   * Sets the extension motor open-loop output.
+   *
+   * @param value Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public void setExtensionPercent(double value) {
     output_type_ = OutputType.PERCENT;
     io_.extension_demand_ = value;
   }
 
-  /** Move the extension to a target position in output-shaft rotations. */
+  /**
+   * Sets the extension target using closed-loop position control.
+   *
+   * @param position Extension position in output-shaft rotations, clamped to the configured soft
+   *     limits.
+   */
   public void setExtensionPosition(double position) {
     output_type_ = OutputType.DISTANCE;
     io_.extension_target_ =
         MathUtil.clamp(position, Constants.kMinExtensionPosition, Constants.kMaxExtensionPosition);
   }
 
-  /** Hold the extension at its current position. */
+  /**
+   * Holds the extension at its current measured position using closed-loop brake control.
+   */
   public void setExtensionBrake() {
     setExtensionBrake(io_.current_extension_position_);
   }
 
-  /** Hold the extension at a specific position in output-shaft rotations. */
+  /**
+   * Holds the extension at a specific position using closed-loop brake control.
+   *
+   * @param position Extension position in output-shaft rotations, clamped to the configured soft
+   *     limits.
+   */
   public void setExtensionBrake(double position) {
     output_type_ = OutputType.BRAKE;
   }
@@ -145,34 +165,74 @@ public class Intake extends SubsystemBase {
     io_.extension_demand_ = 0;
   }
 
+  /**
+   * Returns the intake roller motor output current.
+   *
+   * @return Current draw in amps.
+   */
   public double getRollerCurrent() {
     return io_.current_roller_;
   }
 
+  /**
+   * Returns the extension motor output current.
+   *
+   * @return Current draw in amps.
+   */
   public double getExtensionCurrent() {
     return io_.current_extension_;
   }
 
+  /**
+   * Returns the measured extension position.
+   *
+   * @return Extension position in output-shaft rotations.
+   */
   public double getExtensionPosition() {
     return io_.current_extension_position_;
   }
 
+  /**
+   * Returns the measured intake roller speed.
+   *
+   * @return Roller velocity in motor rotations per minute.
+   */
   public double getRollerVelocity() {
     return io_.current_roller_velocity_;
   }
 
+  /**
+   * Returns the requested roller output.
+   *
+   * @return Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public double getRollerDemand() {
     return io_.roller_demand_;
   }
 
+  /**
+   * Returns the currently requested extension output.
+   *
+   * @return Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public double getExtensionDemand() {
     return io_.extension_demand_;
   }
 
+  /**
+   * Returns the current closed-loop extension target.
+   *
+   * @return Extension target in output-shaft rotations.
+   */
   public double getExtensionTarget() {
     return io_.extension_target_;
   }
 
+  /**
+   * Returns whether the extension has reached its active closed-loop target.
+   *
+   * @return {@code true} when the extension is in distance or brake mode and within tolerance.
+   */
   public boolean isExtensionAtTarget() {
     return output_type_ != OutputType.PERCENT && extension_pid_.atSetpoint();
   }

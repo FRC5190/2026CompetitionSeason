@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -74,8 +73,8 @@ public class Turret extends SubsystemBase {
     hood_config.smartCurrentLimit(Constants.kHoodCurrentLimit);
     hood_config.inverted(Constants.kHoodInverted);
     hood_config.idleMode(IdleMode.kBrake);
-    hood_config.encoder.positionConversionFactor(1.0 / Constants.kHoodGearRatio);
-    hood_config.encoder.velocityConversionFactor(1.0 / Constants.kHoodGearRatio);
+    hood_config.encoder.positionConversionFactor(360.0 / Constants.kHoodGearRatio);
+    hood_config.encoder.velocityConversionFactor((360.0 / Constants.kHoodGearRatio) / 60.0);
 
     hood_ = new SparkMax(Constants.kHoodId, kBrushless);
     hood_.configure(hood_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -88,8 +87,10 @@ public class Turret extends SubsystemBase {
     rotation_config.smartCurrentLimit(Constants.kRotationCurrentLimit);
     rotation_config.inverted(Constants.kRotationInverted);
     rotation_config.idleMode(IdleMode.kBrake);
-    rotation_config.encoder.positionConversionFactor(2 * Math.PI / Constants.kRotationGearRatio);
-    rotation_config.encoder.velocityConversionFactor((2 * Math.PI / Constants.kRotationGearRatio) / 60.0);
+    rotation_config.encoder.positionConversionFactor(360.0 / Constants.kRotationGearRatio);
+    rotation_config
+        .encoder
+        .velocityConversionFactor((360.0 / Constants.kRotationGearRatio) / 60.0);
     rotation_config.apply(new AbsoluteEncoderConfig()
       .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2)
       .positionConversionFactor(2.0 * Math.PI)   // rotations -> radians
@@ -180,16 +181,31 @@ public class Turret extends SubsystemBase {
     rotation_.set(io_.rotation_output_);
   }
 
-  // Absolute encoder
+  /**
+   * Returns the turret absolute encoder angle in radians, normalized to {@code [-pi, pi)}.
+   *
+   * @return Absolute turret angle in radians.
+   */
   public double getEncoderRadians() {
     return bore_encoder_.getPosition();
   }
 
+  /**
+   * Synchronizes the relative turret rotation encoder to the absolute encoder reading.
+   *
+   * <p>The relative encoder is stored in degrees, so the absolute encoder radians are converted
+   * before writing.
+   */
   public void resetEncoder() {
-    rotation_encoder_.setPosition(getEncoderRadians());
+    rotation_encoder_.setPosition(Math.toDegrees(getEncoderRadians()));
   }
 
   // Flywheel
+  /**
+   * Sets the flywheel open-loop output.
+   *
+   * @param percent Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public void setFlywheelPercent(double percent) {
     io_.flywheel_demand_ = percent;
   }
@@ -198,36 +214,76 @@ public class Turret extends SubsystemBase {
     io_.flywheel_demand_ = 0;
   }
 
+  /**
+   * Returns the currently applied flywheel output after clamping.
+   *
+   * @return Motor output in the range {@code [-1.0, 1.0]}.
+   */
   public double getFlywheelPercent() {
     return io_.flywheel_output_;
   }
 
+  /**
+   * Returns the requested flywheel output before clamping.
+   *
+   * @return Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public double getFlywheelDemand() {
     return io_.flywheel_demand_;
   }
 
+  /**
+   * Returns the leader flywheel wheel speed.
+   *
+   * @return Flywheel velocity in wheel rotations per minute.
+   */
   public double getFlywheelLeaderVelocity() {
     return io_.flywheel_leader_velocity_;
   }
 
+  /**
+   * Returns the follower flywheel wheel speed.
+   *
+   * @return Flywheel velocity in wheel rotations per minute.
+   */
   public double getFlywheelFollowerVelocity() {
     return io_.flywheel_follower_velocity_;
   }
 
+  /**
+   * Returns the leader flywheel motor output current.
+   *
+   * @return Current draw in amps.
+   */
   public double getFlywheelLeaderCurrent() {
     return io_.current_flywheel_leader_;
   }
 
+  /**
+   * Returns the follower flywheel motor output current.
+   *
+   * @return Current draw in amps.
+   */
   public double getFlywheelFollowerCurrent() {
     return io_.current_flywheel_follower_;
   }
 
   // Hood
+  /**
+   * Sets the hood open-loop output.
+   *
+   * @param percent Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public void setHoodPercent(double percent) {
     hood_output_type_ = OutputType.PERCENT;
     io_.hood_demand_ = percent;
   }
 
+  /**
+   * Sets the hood target angle using closed-loop position control.
+   *
+   * @param position Hood angle in degrees, clamped to the configured hood soft limits.
+   */
   public void setHoodPosition(double position) {
     hood_output_type_ = OutputType.POSITION;
     io_.hood_target_ =
@@ -238,32 +294,67 @@ public class Turret extends SubsystemBase {
     setHoodPercent(0);
   }
 
+  /**
+   * Returns whether the hood has reached its closed-loop target.
+   *
+   * @return {@code true} when the hood is in position mode and within the configured tolerance.
+   */
   public boolean isHoodAtTarget() {
     return hood_output_type_ == OutputType.POSITION && hood_pid_.atSetpoint();
   }
 
+  /**
+   * Returns the measured hood angle.
+   *
+   * @return Hood position in degrees.
+   */
   public double getHoodPosition() {
     return io_.hood_position_;
   }
 
+  /**
+   * Returns the current hood closed-loop target.
+   *
+   * @return Hood target angle in degrees.
+   */
   public double getHoodTarget() {
     return io_.hood_target_;
   }
 
+  /**
+   * Returns the hood motor output current.
+   *
+   * @return Current draw in amps.
+   */
   public double getHoodCurrent() {
     return io_.current_hood_;
   }
 
+  /**
+   * Returns the currently applied hood output after clamping and soft-limit handling.
+   *
+   * @return Motor output in the range {@code [-1.0, 1.0]}.
+   */
   public double getHoodPercent() {
     return io_.hood_output_;
   }
 
   // Rotation
+  /**
+   * Sets the turret rotation open-loop output.
+   *
+   * @param percent Motor output demand in the range {@code [-1.0, 1.0]}.
+   */
   public void setRotationPercent(double percent) {
     rotation_output_type_ = OutputType.PERCENT;
     io_.rotation_demand_ = percent;
   }
 
+  /**
+   * Sets the turret target angle using closed-loop position control.
+   *
+   * @param position Turret angle in degrees, clamped to the configured rotation soft limits.
+   */
   public void setRotationPosition(double position) {
     rotation_output_type_ = OutputType.POSITION;
     io_.rotation_target_ =
@@ -274,26 +365,47 @@ public class Turret extends SubsystemBase {
     setRotationPercent(0);
   }
 
+  /**
+   * Returns whether the turret has reached its closed-loop target.
+   *
+   * @return {@code true} when the turret is in position mode and within the configured tolerance.
+   */
   public boolean isRotationAtTarget() {
     return rotation_output_type_ == OutputType.POSITION && rotation_pid_.atSetpoint();
   }
 
-  /***
-   * Gets the current position of the rotation motor in radians.
-   * @return The current position in radians.
+  /**
+   * Returns the measured turret angle.
+   *
+   * @return Turret position in degrees.
    */
   public double getRotationPosition() {
     return io_.rotation_position_;
   }
 
+  /**
+   * Returns the current turret closed-loop target.
+   *
+   * @return Turret target angle in degrees.
+   */
   public double getRotationTarget() {
     return io_.rotation_target_;
   }
 
+  /**
+   * Returns the turret rotation motor output current.
+   *
+   * @return Current draw in amps.
+   */
   public double getRotationCurrent() {
     return io_.current_rotation_;
   }
 
+  /**
+   * Returns the currently applied turret rotation output after clamping and soft-limit handling.
+   *
+   * @return Motor output in the range {@code [-1.0, 1.0]}.
+   */
   public double getRotationPercent() {
     return io_.rotation_output_;
   }
