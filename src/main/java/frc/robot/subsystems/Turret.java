@@ -35,7 +35,7 @@ public class Turret extends SubsystemBase {
   // Periodic IO
   private final PeriodicIO io_ = new PeriodicIO();
   private OutputType hood_output_type_ = OutputType.PERCENT;
-  private OutputType rotation_output_type_ = OutputType.PERCENT;
+  private OutputType rotation_output_type_ = OutputType.BRAKE;
 
   public Turret() {
     // Flywheel leader
@@ -88,14 +88,12 @@ public class Turret extends SubsystemBase {
     rotation_config.inverted(Constants.kRotationInverted);
     rotation_config.idleMode(IdleMode.kBrake);
     rotation_config.encoder.positionConversionFactor(360.0 / Constants.kRotationGearRatio);
-    rotation_config
-        .encoder
-        .velocityConversionFactor((360.0 / Constants.kRotationGearRatio) / 60.0);
-    rotation_config.apply(new AbsoluteEncoderConfig()
-      .apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2)
-      .positionConversionFactor(2.0 * Math.PI)   // rotations -> radians
-      .velocityConversionFactor((2.0 * Math.PI) / 60.0) // rpm -> rad/s
-      .zeroOffset(Constants.kEncoderOffset));
+    rotation_config.encoder.velocityConversionFactor((360.0 / Constants.kRotationGearRatio) / 60.0);
+    rotation_config.apply(
+        new AbsoluteEncoderConfig().apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2)
+            .positionConversionFactor(2.0 * Math.PI) // rotations -> radians
+            .velocityConversionFactor((2.0 * Math.PI) / 60.0) // rpm -> rad/s
+            .zeroOffset(Constants.kEncoderOffset));
 
     rotation_ = new SparkMax(Constants.kRotationId, kBrushless);
     rotation_.configure(rotation_config, ResetMode.kResetSafeParameters,
@@ -140,10 +138,13 @@ public class Turret extends SubsystemBase {
             -Constants.kMaxHoodOutput, Constants.kMaxHoodOutput);
         break;
       case PERCENT:
-      default:
         io_.hood_output_ =
             MathUtil.clamp(io_.hood_demand_, -Constants.kMaxHoodOutput, Constants.kMaxHoodOutput);
         break;
+      case BRAKE:
+      default:
+        hood_pid_.setSetpoint(getHoodPosition());
+        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_), -0.1, 0.1);
     }
 
     // Rotation outputs
@@ -154,10 +155,13 @@ public class Turret extends SubsystemBase {
                 -Constants.kMaxRotationOutput, Constants.kMaxRotationOutput);
         break;
       case PERCENT:
-      default:
         io_.rotation_output_ = MathUtil.clamp(io_.rotation_demand_, -Constants.kMaxRotationOutput,
             Constants.kMaxRotationOutput);
         break;
+      case BRAKE:
+      default:
+        rotation_pid_.setSetpoint(getRotationPosition());
+        io_.rotation_output_ = MathUtil.clamp(rotation_pid_.calculate(io_.rotation_position_), -0.1, 0.1);
     }
 
     // Hood soft limits
@@ -193,8 +197,9 @@ public class Turret extends SubsystemBase {
   /**
    * Synchronizes the relative turret rotation encoder to the absolute encoder reading.
    *
-   * <p>The relative encoder is stored in degrees, so the absolute encoder radians are converted
-   * before writing.
+   * <p>
+   * The relative encoder is stored in degrees, so the absolute encoder radians are converted before
+   * writing.
    */
   public void resetEncoder() {
     rotation_encoder_.setPosition(Math.toDegrees(getEncoderRadians()));
@@ -277,6 +282,14 @@ public class Turret extends SubsystemBase {
   public void setHoodPercent(double percent) {
     hood_output_type_ = OutputType.PERCENT;
     io_.hood_demand_ = percent;
+  }
+
+  public void setHoodBrake() {
+    hood_output_type_ = OutputType.BRAKE;
+  }
+
+  public void setRotationBrake() {
+    rotation_output_type_ = OutputType.BRAKE;
   }
 
   /**
@@ -418,7 +431,7 @@ public class Turret extends SubsystemBase {
   }
 
   private enum OutputType {
-    PERCENT, POSITION
+    PERCENT, POSITION, BRAKE
   }
 
   public static class PeriodicIO {
@@ -450,7 +463,7 @@ public class Turret extends SubsystemBase {
     public static final int kFlywheelLeaderId = 14;
     public static final int kFlywheelFollowerId = 15;
     public static final int kHoodId = 16;
-    public static final int kRotationId = 17;
+    public static final int kRotationId = 13;
 
     // Flywheel
     public static final boolean kFlywheelLeaderInverted = false;
@@ -461,7 +474,7 @@ public class Turret extends SubsystemBase {
 
     // Hood
     public static final boolean kHoodInverted = false;
-    public static final int kHoodCurrentLimit = 20; // Keep between [20, 40]
+    public static final int kHoodCurrentLimit = 30; // Keep between [20, 40]
     public static final double kHoodGearRatio = 10.0; // CHANGE
     public static final double kHoodStartingPosition = 0.0;
     public static final double kMinHoodPosition = 0.0;

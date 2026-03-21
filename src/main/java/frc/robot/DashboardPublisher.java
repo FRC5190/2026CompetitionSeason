@@ -16,8 +16,7 @@ public final class DashboardPublisher {
   private static final double kLowBatteryWarningVolts = 11.5;
 
   private final RobotContainer robotContainer_;
-  private final Alert lowBatteryAlert_ =
-      new Alert("Battery voltage is low.", AlertType.kWarning);
+  private final Alert lowBatteryAlert_ = new Alert("Battery voltage is low.", AlertType.kWarning);
   private final Alert visionAlert_ =
       new Alert("Limelight does not have a valid AprilTag target.", AlertType.kInfo);
   private final Alert autoSelectionAlert_ =
@@ -42,28 +41,31 @@ public final class DashboardPublisher {
   }
 
   private void publishDashboardCommands() {
-    publishCommand("Dashboard/Commands/ExtendIntake", "Extend Intake",
-        robotContainer_.superstructure.setExtensionPosition(Intake.Constants.kMaxExtensionPosition));
-    publishCommand("Dashboard/Commands/RetractIntake", "Retract Intake",
-        robotContainer_.superstructure.setExtensionPosition(Intake.Constants.kMinExtensionPosition));
+    // publishCommand("Dashboard/Commands/ExtendIntake", "Extend Intake",
+    // robotContainer_.superstructure
+    // .setExtensionPosition(Intake.Constants.kMaxExtensionPosition));
+    // publishCommand("Dashboard/Commands/RetractIntake", "Retract Intake",
+    // robotContainer_.superstructure
+    // .setExtensionPosition(Intake.Constants.kMinExtensionPosition));
     publishCommand("Dashboard/Commands/IntakeForwardBurst", "Intake Forward Burst",
-        Commands.startEnd(() -> robotContainer_.intake.setRollerPercent(0.6),
-            () -> robotContainer_.intake.stopRoller(), robotContainer_.intake).withTimeout(1.0));
+        Commands
+            .startEnd(() -> robotContainer_.intake.setRollerPercent(0.6),
+                () -> robotContainer_.intake.stopRoller(), robotContainer_.intake)
+            .withTimeout(1.0));
     publishCommand("Dashboard/Commands/IntakeReverseBurst", "Intake Reverse Burst",
-        Commands.startEnd(() -> robotContainer_.intake.setRollerPercent(-0.6),
-            () -> robotContainer_.intake.stopRoller(), robotContainer_.intake).withTimeout(1.0));
+        Commands
+            .startEnd(() -> robotContainer_.intake.setRollerPercent(-0.6),
+                () -> robotContainer_.intake.stopRoller(), robotContainer_.intake)
+            .withTimeout(1.0));
     publishCommand("Dashboard/Commands/IndexerFeedBurst", "Indexer Feed Burst",
         Commands.startEnd(() -> robotContainer_.indexer.setPercent(0.8),
             () -> robotContainer_.indexer.stop(), robotContainer_.indexer).withTimeout(0.75));
-    publishCommand("Dashboard/Commands/ShooterStow", "Shooter Stow",
-        Commands.run(() -> {
-          robotContainer_.turret.stopFlywheel();
-          robotContainer_.turret.setHoodPosition(0.0);
-          robotContainer_.turret.setRotationPosition(0.0);
-        }, robotContainer_.turret)
-            .until(() -> robotContainer_.turret.isHoodAtTarget()
-                && robotContainer_.turret.isRotationAtTarget())
-            .withTimeout(2.0));
+    publishCommand("Dashboard/Commands/ShooterStow", "Shooter Stow", Commands.run(() -> {
+      robotContainer_.turret.stopFlywheel();
+      robotContainer_.turret.setHoodPosition(0.0);
+      robotContainer_.turret.setRotationPosition(0.0);
+    }, robotContainer_.turret).until(() -> robotContainer_.turret.isHoodAtTarget()
+        && robotContainer_.turret.isRotationAtTarget()).withTimeout(2.0));
     publishCommand("Dashboard/Commands/StopAllMechanisms", "Stop All Mechanisms",
         Commands.runOnce(() -> {
           robotContainer_.intake.stopAll();
@@ -95,7 +97,8 @@ public final class DashboardPublisher {
         Math.hypot(robotVelocity.vxMetersPerSecond, robotVelocity.vyMetersPerSecond));
     SmartDashboard.putNumber("Drive/AngularSpeedDegPerSec",
         Math.toDegrees(robotVelocity.omegaRadiansPerSecond));
-    SmartDashboard.putBoolean("Drive/VisionPoseValid", robotContainer_.drivebase.isVisionPoseValid());
+    SmartDashboard.putBoolean("Drive/VisionPoseValid",
+        robotContainer_.drivebase.isVisionPoseValid());
 
     SmartDashboard.putBoolean("Vision/HasTag", robotContainer_.vision.hasTag());
     SmartDashboard.putNumber("Vision/TagId", robotContainer_.vision.getClosestTagID());
@@ -108,13 +111,16 @@ public final class DashboardPublisher {
     SmartDashboard.putNumber("Intake/RollerCurrent", robotContainer_.intake.getRollerCurrent());
     SmartDashboard.putNumber("Intake/RollerVelocity", robotContainer_.intake.getRollerVelocity());
     SmartDashboard.putNumber("Intake/ExtensionDemand", robotContainer_.intake.getExtensionDemand());
-    SmartDashboard.putNumber("Intake/ExtensionPosition", robotContainer_.intake.getExtensionPosition());
+    SmartDashboard.putNumber("Intake/ExtensionPosition",
+        robotContainer_.intake.getExtensionPosition());
     SmartDashboard.putNumber("Intake/ExtensionTarget", robotContainer_.intake.getExtensionTarget());
-    SmartDashboard.putBoolean("Intake/ExtensionAtTarget", robotContainer_.intake.isExtensionAtTarget());
-    SmartDashboard.putNumber("Intake/ExtensionCurrent", robotContainer_.intake.getExtensionCurrent());
+    SmartDashboard.putBoolean("Intake/ExtensionAtTarget",
+        robotContainer_.intake.isExtensionAtTarget());
+    SmartDashboard.putNumber("Intake/ExtensionCurrent",
+        robotContainer_.intake.getExtensionCurrent());
 
     SmartDashboard.putNumber("Indexer/Demand", robotContainer_.indexer.getIndexerPercent());
-    SmartDashboard.putNumber("Indexer/Current", robotContainer_.indexer.getIndexerCurrent());
+    // SmartDashboard.putNumber("Indexer/Current", robotContainer_.indexer.getIndexerCurrent());
 
     SmartDashboard.putNumber("Turret/FlywheelDemand", robotContainer_.turret.getFlywheelDemand());
     SmartDashboard.putNumber("Turret/FlywheelOutput", robotContainer_.turret.getFlywheelPercent());
@@ -125,7 +131,8 @@ public final class DashboardPublisher {
     SmartDashboard.putNumber("Turret/HoodPosition", robotContainer_.turret.getHoodPosition());
     SmartDashboard.putNumber("Turret/HoodTarget", robotContainer_.turret.getHoodTarget());
     SmartDashboard.putBoolean("Turret/HoodAtTarget", robotContainer_.turret.isHoodAtTarget());
-    SmartDashboard.putNumber("Turret/RotationPosition", robotContainer_.turret.getRotationPosition());
+    SmartDashboard.putNumber("Turret/RotationPosition",
+        robotContainer_.turret.getRotationPosition());
     SmartDashboard.putNumber("Turret/RotationTarget", robotContainer_.turret.getRotationTarget());
     SmartDashboard.putBoolean("Turret/RotationAtTarget",
         robotContainer_.turret.isRotationAtTarget());

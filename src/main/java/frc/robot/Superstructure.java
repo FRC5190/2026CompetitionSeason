@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Turret;
@@ -25,9 +26,17 @@ public class Superstructure {
   public Command setExtensionPosition(double position) {
     return new RunCommand(() -> intake_.setExtensionPosition(position), intake_)
         .until(() -> intake_.isExtensionAtTarget())
-        .andThen(new InstantCommand(() -> intake_.stopExtension()))
-        .withTimeout(Seconds.of(2));
+        .andThen(new InstantCommand(() -> intake_.stopExtension())).withTimeout(Seconds.of(2));
   }
+
+  public Command extendIntakeRoll(double percent) {
+    return new ParallelCommandGroup(jogRoller(percent), setExtensionPosition(3.5));
+  }
+
+  public Command indexerAndShooter(double percent) {
+    return new ParallelCommandGroup(jogIndexer(-1 * percent), runFlywheel(percent));
+  }
+
 
   // Roller jog
   public Command jogRoller(double percent) {
@@ -53,19 +62,20 @@ public class Superstructure {
   }
 
   // --- Hood ---
-  public Command jogHoodUp() {
-    return new StartEndCommand(() -> turret_.setHoodPercent(Constants.kHoodJogPercent),
-        () -> turret_.stopHood(), turret_);
+  public Command jogHoodUp(double percent) {
+    return new StartEndCommand(() -> turret_.setHoodPercent(percent), () -> turret_.setHoodBrake(),
+        turret_);
   }
 
-  public Command jogHoodDown() {
-    return new StartEndCommand(() -> turret_.setHoodPercent(-Constants.kHoodJogPercent),
-        () -> turret_.stopHood(), turret_);
-  }
+  // public Command jogHoodDown() {
+  // return new StartEndCommand(() -> turret_.setHoodPercent(-Constants.kHoodJogPercent),
+  // () -> turret_.stopHood(), turret_);
+  // }
 
   public Command setHoodPosition(double position) {
     return new RunCommand(() -> turret_.setHoodPosition(position), turret_)
-        .until(() -> turret_.isHoodAtTarget());
+        .until(() -> turret_.isHoodAtTarget())
+        .andThen(new InstantCommand(() -> turret_.setHoodBrake()));
   }
 
   // --- Rotation ---
@@ -94,6 +104,7 @@ public class Superstructure {
       }
     }, turret_);
   }
+
 
   public static class Constants {
     public static final double kHoodJogPercent = 0.2;

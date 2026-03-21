@@ -2,39 +2,55 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class Indexer extends SubsystemBase {
 
-  private final SparkMax indexer_;
+  private final SparkMax indexer_leader_;
+  private final SparkMax indexer_follower_;
 
   private final PeriodicIO io_ = new PeriodicIO();
 
   public Indexer() {
 
-    // Indexer
-    SparkMaxConfig indexer_config = new SparkMaxConfig();
-    indexer_config.voltageCompensation(12);
-    indexer_config.smartCurrentLimit(Constants.kCurrentLimit);
-    indexer_config.inverted(false);
-    indexer_config.idleMode(IdleMode.kCoast);
+    // --- Indexer Leader ---
+    SparkMaxConfig leader_config = new SparkMaxConfig();
+    leader_config.voltageCompensation(12);
+    leader_config.smartCurrentLimit(Constants.kCurrentLimit);
+    leader_config.inverted(false);
+    leader_config.idleMode(IdleMode.kCoast);
 
-    indexer_ = new SparkMax(Constants.kIndexerId, kBrushless);
-    indexer_.configure(indexer_config, ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+    indexer_leader_ = new SparkMax(Constants.kIndexerLeaderId, kBrushless);
+    indexer_leader_.configure(leader_config, com.revrobotics.ResetMode.kResetSafeParameters,
+        com.revrobotics.PersistMode.kPersistParameters);
+
+    // --- Indexer Follower (same direction as leader) ---
+    SparkMaxConfig follower_config = new SparkMaxConfig();
+    follower_config.voltageCompensation(12);
+    follower_config.smartCurrentLimit(Constants.kCurrentLimit);
+    follower_config.idleMode(IdleMode.kCoast);
+    // follower_config.follow(Constants.kIndexerLeaderId, false); // false = same direction as
+    // leader
+
+    indexer_follower_ = new SparkMax(Constants.kIndexerFollowerId, kBrushless);
+    indexer_follower_.configure(follower_config, com.revrobotics.ResetMode.kResetSafeParameters,
+        com.revrobotics.PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // Read inputs
-    io_.current_indexer_ = indexer_.getOutputCurrent();
+    io_.current_leader_ = indexer_leader_.getOutputCurrent();
+    io_.current_follower_ = indexer_follower_.getOutputCurrent();
 
-    // Write outputs
-    indexer_.set(io_.indexer_demand_);
+    // Write outputs — follower mirrors leader automatically
+    indexer_leader_.set(io_.indexer_demand_);
+    indexer_follower_.set(io_.indexer_demand_);
+    System.out.println("io indexer demand: " + io_.indexer_demand_);
   }
 
   /** Spin the indexer at a given percent output [-1, 1] */
@@ -47,8 +63,12 @@ public class Indexer extends SubsystemBase {
     io_.indexer_demand_ = 0;
   }
 
-  public double getIndexerCurrent() {
-    return io_.current_indexer_;
+  public double getLeaderCurrent() {
+    return io_.current_leader_;
+  }
+
+  public double getFollowerCurrent() {
+    return io_.current_follower_;
   }
 
   public double getIndexerPercent() {
@@ -57,14 +77,16 @@ public class Indexer extends SubsystemBase {
 
   public static class PeriodicIO {
     // Inputs
-    double current_indexer_;
+    double current_leader_;
+    double current_follower_;
 
     // Outputs
     double indexer_demand_;
   }
 
   public static class Constants {
-    public static final int kIndexerId = 11;
-    public static final int kCurrentLimit = 20; // Keep between [20, 40]
+    public static final int kIndexerLeaderId = 11;
+    public static final int kIndexerFollowerId = 12;
+    public static final int kCurrentLimit = 30; // Keep between [20, 40]
   }
 }

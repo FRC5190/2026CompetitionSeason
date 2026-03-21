@@ -52,8 +52,10 @@ public class Intake extends SubsystemBase {
     // Safety
     roller_config.smartCurrentLimit(Constants.kRollerCurrentLimit);
     extension_config.smartCurrentLimit(Constants.kExtensionCurrentLimit);
-    extension_config.softLimit.forwardSoftLimit(Constants.kMaxExtensionPosition); // Double check this
-    extension_config.softLimit.reverseSoftLimit(Constants.kMinExtensionPosition); // Double check this
+    extension_config.softLimit.forwardSoftLimit(Constants.kMaxExtensionPosition); // Double check
+                                                                                  // this
+    extension_config.softLimit.reverseSoftLimit(Constants.kMinExtensionPosition); // Double check
+                                                                                  // this
 
     // Configuration
 
@@ -123,7 +125,7 @@ public class Intake extends SubsystemBase {
    * Sets the extension target using closed-loop position control.
    *
    * @param position Extension position in output-shaft rotations, clamped to the configured soft
-   *     limits.
+   *        limits.
    */
   public void setExtensionPosition(double position) {
     output_type_ = OutputType.DISTANCE;
@@ -142,7 +144,7 @@ public class Intake extends SubsystemBase {
    * Holds the extension at a specific position using closed-loop brake control.
    *
    * @param position Extension position in output-shaft rotations, clamped to the configured soft
-   *     limits.
+   *        limits.
    */
   public void setExtensionBrake(double position) {
     output_type_ = OutputType.BRAKE;
@@ -256,7 +258,7 @@ public class Intake extends SubsystemBase {
 
   public static class Constants {
     // Extension Constants
-    public static final int kExtensionId = 10;
+    public static final int kExtensionId = 9;
     public static final double kExtensionGearRatio = 5.0; // CHANGE
     public static final double kMaxExtensionPosition = 10.0; // CHANGE
     public static final double kMinExtensionPosition = -0.2; // CHANGE
@@ -270,7 +272,7 @@ public class Intake extends SubsystemBase {
     public static final int kExtensionCurrentLimit = 30; // Keep between [<20, 40] MAX 40
 
     // Roller Constants
-    public static final int kRollerId = 9;
+    public static final int kRollerId = 10;
 
     public static final int kRollerCurrentLimit = 30; // Keep between [<20, 40] MAX 40
   }

@@ -104,17 +104,27 @@ public class RobotContainer {
     // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).
     // whileTrue(drivebase.alignToOffset(0.25, 0, 180, 31));
 
-    m_driverController.a().whileTrue(superstructure.jogRoller(0.6));
-    m_driverController.b().whileTrue(superstructure.jogRoller(-0.6));
+    m_driverController.leftTrigger().whileTrue(superstructure.extendIntakeRoll(0.6));
+    // m_driverController.b().whileTrue(superstructure.jogRoller(-0.6));
+    m_driverController.rightTrigger().whileTrue(superstructure.indexerAndShooter(0.15));
+    // m_driverController.x().whileTrue(superstructure.jogIndexer(0.15));
+    m_driverController.x().whileTrue(superstructure.setHoodPosition(10));
+    m_driverController.y().whileTrue(superstructure.jogHoodUp(0.15));
+    m_driverController.b().whileTrue(superstructure.jogHoodUp(-0.15));
 
-    m_driverController.rightBumper().whileTrue(superstructure.jogExtension(0.2));
-    m_driverController.leftBumper().whileTrue(superstructure.jogExtension(-0.2));
+    // m_driverController.rightTrigger().whileTrue(superstructure.runFlywheel(0.30));
+    // m_driverController.leftTrigger().whileTrue(superstructure.runFlywheel(-0.15));
+
+
+
+    m_driverController.rightBumper().whileTrue(superstructure.jogExtension(0.05));
+    m_driverController.leftBumper().whileTrue(superstructure.jogExtension(-0.05));
 
     // m_driverController.x().whileTrue(superstructure.jogIndexer(0.8));
     // m_driverController.y().whileTrue(superstructure.jogIndexer(-0.8));
 
-    m_driverController.leftTrigger()
-        .whileTrue(new ShootOnTheMove(turret, drivebase, vision, getShootTarget()));
+    // m_driverController.leftTrigger()
+    // .whileTrue(new ShootOnTheMove(turret, drivebase, vision, getShootTarget()));
 
   }
 

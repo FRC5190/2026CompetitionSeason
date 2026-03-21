@@ -12,10 +12,10 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 
 /**
-* The methods in this class are called automatically corresponding to each mode, as described in
-* the TimedRobot documentation. If you change the name of this class or the package after creating
-* this project, you must also update the Main.java file in the project.
-*/
+ * The methods in this class are called automatically corresponding to each mode, as described in
+ * the TimedRobot documentation. If you change the name of this class or the package after creating
+ * this project, you must also update the Main.java file in the project.
+ */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
@@ -26,11 +26,11 @@ public class Robot extends TimedRobot {
   private final DashboardPublisher dashboardPublisher;
 
   /**
-  * This function is run when the robot is first started up and should be used for any
-  * initialization code.
-  */
+   * This function is run when the robot is first started up and should be used for any
+   * initialization code.
+   */
   public Robot() {
-    // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
+    // Instantiate our RobotContainer. This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
     dashboardPublisher = new DashboardPublisher(m_robotContainer);
@@ -42,17 +42,18 @@ public class Robot extends TimedRobot {
   }
 
   /**
-  * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
-  * that you want ran during disabled, autonomous, teleoperated and test.
-  *
-  * <p>This runs after the mode specific periodic functions, but before LiveWindow and
-  * SmartDashboard integrated updating.
-  */
+   * This function is called every 20 ms, no matter the mode. Use this for items like diagnostics
+   * that you want ran during disabled, autonomous, teleoperated and test.
+   *
+   * <p>
+   * This runs after the mode specific periodic functions, but before LiveWindow and SmartDashboard
+   * integrated updating.
+   */
   @Override
   public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
+    // Runs the Scheduler. This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
+    // and running subsystem periodic() methods. This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
     dashboardPublisher.update();
@@ -63,7 +64,7 @@ public class Robot extends TimedRobot {
     // var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
     // if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
-    //   m_robotContainer.drivebase.resetOdometry(llMeasurement.pose);
+    // m_robotContainer.drivebase.resetOdometry(llMeasurement.pose);
     // }
 
     // double tx = LimelightHelpers.getTX(kLL);
@@ -79,8 +80,8 @@ public class Robot extends TimedRobot {
 
     // double now = Timer.getFPGATimestamp();
     // if (now - lastPrint > 0.5){
-    //   System.out.println("tv = " + tv + " tx = " + tx + " tagID = " + tagId);
-    //   lastPrint = now;
+    // System.out.println("tv = " + tv + " tx = " + tx + " tagID = " + tagId);
+    // lastPrint = now;
     // }
   }
 
@@ -121,7 +122,8 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    //System.out.println("SeesTag(10): " + drivebase.seesTag(10) + " TV: " + LimelightHelpers.getTV("limelight"));
+    // System.out.println("SeesTag(10): " + drivebase.seesTag(10) + " TV: " +
+    // LimelightHelpers.getTV("limelight"));
   }
 
   @Override
