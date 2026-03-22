@@ -29,13 +29,13 @@ public class Superstructure {
         .andThen(new InstantCommand(() -> intake_.stopExtension())).withTimeout(Seconds.of(2));
   }
 
-  public Command extendIntakeRoll(double percent) {
-    return new ParallelCommandGroup(jogRoller(percent), setExtensionPosition(3.5));
-  }
+  // public Command extendIntakeRoll(double percent) {
+  //   return new ParallelCommandGroup(jogRoller(percent), setExtensionPosition(3.5));
+  // }
 
-  public Command indexerAndShooter(double percent) {
-    return new ParallelCommandGroup(jogIndexer(-1 * percent), runFlywheel(percent));
-  }
+  // public Command indexerAndShooter(double percent) {
+  //   return new ParallelCommandGroup(jogIndexer(-1 * percent), runFlywheel(percent));
+  // }
 
 
   // Roller jog
@@ -63,9 +63,11 @@ public class Superstructure {
 
   // --- Hood ---
   public Command jogHoodUp(double percent) {
-    return new StartEndCommand(() -> turret_.setHoodPercent(percent), () -> turret_.setHoodBrake(),
+    return new StartEndCommand(() -> turret_.setHoodPercent(percent), () -> turret_.setHoodPercent(0.05),
         turret_);
   }
+
+  
 
   // public Command jogHoodDown() {
   // return new StartEndCommand(() -> turret_.setHoodPercent(-Constants.kHoodJogPercent),
@@ -75,17 +77,17 @@ public class Superstructure {
   public Command setHoodPosition(double position) {
     return new RunCommand(() -> turret_.setHoodPosition(position), turret_)
         .until(() -> turret_.isHoodAtTarget())
-        .andThen(new InstantCommand(() -> turret_.setHoodBrake()));
+        .andThen(new InstantCommand(() -> turret_.stopHood())).withTimeout(Seconds.of(2));
   }
 
   // --- Rotation ---
-  public Command jogRotationLeft() {
-    return new StartEndCommand(() -> turret_.setRotationPercent(-Constants.kRotationJogPercent),
-        () -> turret_.stopRotation(), turret_);
-  }
+  // public Command jogRotationLeft() {
+  //   return new StartEndCommand(() -> turret_.setRotationPercent(-Constants.kRotationJogPercent),
+  //       () -> turret_.stopRotation(), turret_);
+  // }
 
-  public Command jogRotationRight() {
-    return new StartEndCommand(() -> turret_.setRotationPercent(Constants.kRotationJogPercent),
+  public Command jogRotationRight(double percent) {
+    return new StartEndCommand(() -> turret_.setRotationPercent(percent),
         () -> turret_.stopRotation(), turret_);
   }
 

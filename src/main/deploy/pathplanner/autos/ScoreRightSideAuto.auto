@@ -9,6 +9,12 @@
           "data": {
             "pathName": "ScoreRightSide"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": null
+          }
         }
       ]
     }

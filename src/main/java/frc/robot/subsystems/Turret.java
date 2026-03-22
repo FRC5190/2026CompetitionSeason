@@ -478,7 +478,7 @@ public class Turret extends SubsystemBase {
     public static final double kHoodGearRatio = 10.0; // CHANGE
     public static final double kHoodStartingPosition = 0.0;
     public static final double kMinHoodPosition = 0.0;
-    public static final double kMaxHoodPosition = 20.0;
+    public static final double kMaxHoodPosition = 50.0;
     public static final double kHoodP = 0.05;
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
