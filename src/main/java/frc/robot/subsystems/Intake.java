@@ -239,6 +239,11 @@ public class Intake extends SubsystemBase {
     return output_type_ != OutputType.PERCENT && extension_pid_.atSetpoint();
   }
 
+  public boolean isExtensionNearTarget() {
+    return Math.abs(io_.extension_target_ - io_.current_extension_position_)
+        <= Constants.kExtensionTolerance;
+  }
+
   private enum OutputType {
     PERCENT, DISTANCE, BRAKE
   }
