@@ -148,6 +148,8 @@ public class Intake extends SubsystemBase {
    */
   public void setExtensionBrake(double position) {
     output_type_ = OutputType.BRAKE;
+    io_.extension_target_ =
+        MathUtil.clamp(position, Constants.kMinExtensionPosition, Constants.kMaxExtensionPosition);
   }
 
   /** Stop all motors */
