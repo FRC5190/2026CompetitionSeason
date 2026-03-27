@@ -2,10 +2,10 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Turret;
@@ -63,7 +63,7 @@ public class Superstructure {
 
   // --- Hood ---
   public Command jogHoodUp(double percent) {
-    return new StartEndCommand(() -> turret_.setHoodPercent(percent), () -> turret_.setHoodPercent(0.03),
+    return new StartEndCommand(() -> turret_.setHoodPercent(percent), turret_::setHoodBrake,
         turret_);
   }
 
@@ -75,9 +75,10 @@ public class Superstructure {
   // }
 
   public Command setHoodPosition(double position) {
-    return new RunCommand(() -> turret_.setHoodPosition(position), turret_)
-        .until(() -> turret_.isHoodAtTarget())
-        .andThen(new InstantCommand(() -> turret_.stopHood())).withTimeout(Seconds.of(2));
+    return Commands.sequence(
+        Commands.runOnce(() -> turret_.setHoodPosition(position), turret_),
+        Commands.waitUntil(turret_::isHoodAtTarget).withTimeout(Seconds.of(2)),
+        Commands.runOnce(turret_::setHoodBrake, turret_));
   }
 
   // --- Rotation ---

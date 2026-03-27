@@ -143,8 +143,8 @@ public class Turret extends SubsystemBase {
         break;
       case BRAKE:
       default:
-        hood_pid_.setSetpoint(getHoodPosition());
-        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_), -0.9, 0.9);
+        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_, io_.hood_target_),
+            -Constants.kMaxHoodOutput, Constants.kMaxHoodOutput);
     }
 
     // Rotation outputs
@@ -160,8 +160,9 @@ public class Turret extends SubsystemBase {
         break;
       case BRAKE:
       default:
-        rotation_pid_.setSetpoint(getRotationPosition());
-        io_.rotation_output_ = MathUtil.clamp(rotation_pid_.calculate(io_.rotation_position_), -0.1, 0.1);
+        io_.rotation_output_ =
+            MathUtil.clamp(rotation_pid_.calculate(io_.rotation_position_, io_.rotation_target_),
+                -Constants.kMaxRotationOutput, Constants.kMaxRotationOutput);
     }
 
     // Hood soft limits
@@ -286,10 +287,12 @@ public class Turret extends SubsystemBase {
 
   public void setHoodBrake() {
     hood_output_type_ = OutputType.BRAKE;
+    io_.hood_target_ = io_.hood_position_;
   }
 
   public void setRotationBrake() {
     rotation_output_type_ = OutputType.BRAKE;
+    io_.rotation_target_ = io_.rotation_position_;
   }
 
   /**
@@ -479,7 +482,7 @@ public class Turret extends SubsystemBase {
     public static final double kHoodStartingPosition = 0.0;
     public static final double kMinHoodPosition = 0.0;
     public static final double kMaxHoodPosition = 50.0;
-    public static final double kHoodP = 0.05;
+    public static final double kHoodP = 0.1;
     public static final double kHoodI = 0.0;
     public static final double kHoodD = 0.0;
     public static final double kHoodTolerance = 0.5;

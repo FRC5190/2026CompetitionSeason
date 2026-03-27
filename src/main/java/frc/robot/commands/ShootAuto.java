@@ -5,7 +5,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.Indexer;
 import frc.robot.subsystems.Intake;
-import frc.robot.subsystems.VisionSubsystem;
+
 
 public class ShootAuto {
 
@@ -34,8 +34,7 @@ public class ShootAuto {
   // );
   // }
 
-  public static Command shoot(Turret turret, Indexer indexer, Intake intake,
-      VisionSubsystem vision) {
+  public static Command shoot(Turret turret, Indexer indexer, Intake intake) {
     return Commands.sequence(
 
         Commands.runOnce(() -> intake.setExtensionPosition(1.3)),
