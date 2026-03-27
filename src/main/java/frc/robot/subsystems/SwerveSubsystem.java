@@ -131,11 +131,19 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void driveFieldOriented(ChassisSpeeds velocity){
-    swerveDrive.driveFieldOriented(velocity);
+    driveFieldOrientedWithGyro(velocity);
   }
 
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
-    return run(() -> swerveDrive.driveFieldOriented(velocity.get()));
+    return run(() -> driveFieldOrientedWithGyro(velocity.get()));
+  }
+
+  public void resetGyro() {
+    swerveDrive.zeroGyro();
+  }
+
+  private void driveFieldOrientedWithGyro(ChassisSpeeds fieldRelativeSpeeds) {
+    swerveDrive.drive(ChassisSpeeds.fromFieldRelativeSpeeds(fieldRelativeSpeeds, swerveDrive.getYaw()));
   }
 
   

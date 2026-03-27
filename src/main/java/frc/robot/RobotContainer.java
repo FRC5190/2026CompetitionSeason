@@ -100,6 +100,7 @@ public class RobotContainer {
 
     m_driverController.b().and(new Trigger(() -> drivebase.seesTag(26))).
     whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
+    m_driverController.povLeft().onTrue(Commands.runOnce(drivebase::resetGyro, drivebase));
 
     // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).
     // whileTrue(drivebase.alignToOffset(0.25, 0, 180, 31));
@@ -127,7 +128,7 @@ public class RobotContainer {
 
   m_operatorController.y().whileTrue(superstructure.jogHoodUp(0.45));
   m_operatorController.a().whileTrue(superstructure.jogHoodUp(-0.02));  
-  m_operatorController.b().whileTrue(superstructure.setHoodPosition(30));
+  m_operatorController.b().onTrue(superstructure.setHoodPosition(30));
 
     // m_driverController.rightTrigger().whileTrue(superstructure.runFlywheel(0.30));
     // m_driverController.leftTrigger().whileTrue(superstructure.runFlywheel(-0.15));
@@ -180,7 +181,7 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     String autoName = getResolvedAutoName();
     //Command pathCommand = drivebase.getAutonomousCommand(autoName);
-    Command shootCommand = ShootAuto.shoot(turret, indexer, intake, vision);
+    Command shootCommand = ShootAuto.shoot(turret, indexer, intake);
 
     // return Commands.sequence(pathCommand, shootCommand).withName("Auto: " + autoName);
     return Commands.sequence(shootCommand).withName("Auto: " + autoName);
