@@ -256,6 +256,11 @@ public class Turret extends SubsystemBase {
     return io_.flywheel_follower_velocity_;
   }
 
+  public double getFlywheelAverageVelocityRpm() {
+    return (Math.abs(io_.flywheel_leader_velocity_) + Math.abs(io_.flywheel_follower_velocity_))
+        / 2.0;
+  }
+
   /**
    * Returns the leader flywheel motor output current.
    *
@@ -335,6 +340,10 @@ public class Turret extends SubsystemBase {
    */
   public double getHoodTarget() {
     return io_.hood_target_;
+  }
+
+  public boolean isHoodNearTarget() {
+    return Math.abs(io_.hood_target_ - io_.hood_position_) <= Constants.kHoodTolerance;
   }
 
   /**

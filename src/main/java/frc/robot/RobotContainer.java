@@ -3,24 +3,18 @@ package frc.robot;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ExampleCommand;
 import frc.robot.commands.ShootAuto;
-import frc.robot.commands.ShootOnTheMove;
 import frc.robot.subsystems.ExampleSubsystem;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Indexer;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.Turret;
 import frc.robot.subsystems.VisionSubsystem;
-import swervelib.SwerveInputStream;
-
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import swervelib.SwerveInputStream;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -40,16 +34,8 @@ public class RobotContainer {
   public final Indexer indexer = new Indexer();
   public final Turret turret = new Turret();
   private final SendableChooser<String> autonomousChooser = new SendableChooser<>();
-
-  // Blue alliance tag
-  private final Pose2d blue_target_ = new Pose2d(new Translation2d(0.0, 5.5), new Rotation2d());
-
-  // Red alliance tag
-  private final Pose2d red_target_ = new Pose2d(new Translation2d(16.54, 5.5), new Rotation2d());
-
   public final Superstructure superstructure = new Superstructure(intake, indexer, turret);
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController m_driverController = new CommandXboxController(1);
   private final CommandXboxController m_operatorController = new CommandXboxController(2);
 
@@ -61,18 +47,12 @@ public class RobotContainer {
     drivebase.setDefaultCommand(driveFieldOrientedAngularVelocity);
   }
 
+  // SENSITIVITY CHANGE THE 2.0 and -2.0 below
   SwerveInputStream driveAngularVelocity = SwerveInputStream
       .of(drivebase.getSwerveDrive(), () -> m_driverController.getLeftY() * -2.0,
           () -> m_driverController.getLeftX() * -2.0)
       .withControllerRotationAxis(m_driverController::getRightX)
       .deadband(OperatorConstants.DEADBAND).scaleTranslation(0.8).allianceRelativeControl(false);
-
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy()
-      .withControllerHeadingAxis(m_driverController::getRightX, m_driverController::getRightY)
-      .headingWhile(true);
-
-
-  Command driveFieldOrientedDirectAngle = drivebase.driveFieldOriented(driveDirectAngle);
 
   Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
@@ -86,78 +66,27 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     new Trigger(m_exampleSubsystem::exampleCondition)
         .onTrue(new ExampleCommand(m_exampleSubsystem));
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-
-    // CHANGE TO ONTRUE FROM WHILETRUE LATER - latest
-    // m_driverController.x().and(new Trigger(() -> drivebase.seesTag(10))).
-    // whileTrue(drivebase.alignToOffset(1, 0.50, 180, 10));
-
-    // m_driverController.leftBumper().and(new Trigger(() -> drivebase.seesTag(15))).
-    // whileTrue(drivebase.alignToOffset(0.25, 0, 0, 15));
-
+    // Driver controls
     m_driverController.b().and(new Trigger(() -> drivebase.seesTag(26))).
-    whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
+        whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
     m_driverController.povLeft().onTrue(Commands.runOnce(drivebase::resetGyro, drivebase));
-
-    // m_driverController.y().and(new Trigger(() -> drivebase.seesTag(31))).
-    // whileTrue(drivebase.alignToOffset(0.25, 0, 180, 31));
-
-  // m_driverController.x().and(new Trigger(() -> drivebase.seesTag(10)))
-  // .onTrue(
-  //   drivebase.alignToOffset(0.5, 0, 180, 10)
-  //     .until(this::driverInputDetected)
-  // );
-
-    // m_driverController.leftTrigger().whileTrue(superstructure.extendIntakeRoll(0.6));
-    // m_driverController.b().whileTrue(superstructure.jogRoller(-0.6));
-    // m_driverController.rightTrigger().whileTrue(superstructure.indexerAndShooter(0.15));
-    // m_driverController.x().whileTrue(superstructure.jogIndexer(0.15));
     m_driverController.leftTrigger().whileTrue(superstructure.jogIndexer(-0.4));
     m_driverController.rightTrigger().whileTrue(superstructure.runFlywheel(-0.45));
     m_driverController.leftBumper().whileTrue(superstructure.jogIndexer(0.4));
     m_driverController.rightBumper().whileTrue(superstructure.runFlywheel(0.45));
     m_driverController.a().onTrue(superstructure.setExtensionPosition(1.7));
 
-
-    // m_driverController.x().whileTrue(superstructure.setHoodPosition(30));
-    // m_driverController.y().whileTrue(superstructure.jogHoodUp(0.10));
-    // m_driverController.y().whileTrue(superstructure.setHoodBrake());
-
-  m_operatorController.y().whileTrue(superstructure.jogHoodUp(0.45));
-  m_operatorController.a().whileTrue(superstructure.jogHoodUp(-0.02));  
-  m_operatorController.b().onTrue(superstructure.setHoodPosition(30));
-
-    // m_driverController.rightTrigger().whileTrue(superstructure.runFlywheel(0.30));
-    // m_driverController.leftTrigger().whileTrue(superstructure.runFlywheel(-0.15));
-
-
-
-  m_operatorController.rightBumper().whileTrue(superstructure.jogExtension(0.25));
-  m_operatorController.leftBumper().whileTrue(superstructure.jogExtension(-0.7));
-
-  m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(0.75));
-  m_operatorController.leftTrigger().whileTrue(superstructure.jogRoller(-0.75));
-
-    // m_operatorController.x().whileTrue(superstructure.jogRotationRight(0.1));
-    // m_operatorController.b().whileTrue(superstructure.jogRotationRight(-0.1));
-
-    // m_driverController.x().whileTrue(superstructure.jogIndexer(0.8));
-    // m_driverController.y().whileTrue(superstructure.jogIndexer(-0.8));
-
-    // m_driverController.leftTrigger()
-    // .whileTrue(new ShootOnTheMove(turret, drivebase, vision, getShootTarget()));
-
-  }
-
-  private boolean driverInputDetected() {
-    return Math.abs(m_driverController.getLeftY()) > 0.1 || 
-          Math.abs(m_driverController.getLeftX()) > 0.1 ||
-          Math.abs(m_driverController.getRightX()) > 0.1;
+    // Operator controls
+    m_operatorController.y().whileTrue(superstructure.jogHoodUp(0.45));
+    m_operatorController.a().whileTrue(superstructure.jogHoodUp(-0.02));
+    m_operatorController.b().onTrue(superstructure.setHoodPosition(30));
+    m_operatorController.rightBumper().whileTrue(superstructure.jogExtension(0.25));
+    m_operatorController.leftBumper().whileTrue(superstructure.jogExtension(-0.7));
+    m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(0.75));
+    m_operatorController.leftTrigger().whileTrue(superstructure.jogRoller(-0.75));
   }
 
   private void configureAutos() {
@@ -168,14 +97,6 @@ public class RobotContainer {
     autonomousChooser.addOption("Simple Auto", "Simple Auto");
   }
 
-  private Pose2d getShootTarget() {
-    if (DriverStation.getAlliance().isPresent()
-        && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
-      return red_target_;
-    }
-    return blue_target_;
-  }
-
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -183,12 +104,8 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     String autoName = getResolvedAutoName();
-    //Command pathCommand = drivebase.getAutonomousCommand(autoName);
     Command shootCommand = ShootAuto.shoot(turret, indexer);
-
-    // return Commands.sequence(pathCommand, shootCommand).withName("Auto: " + autoName);
     return Commands.sequence(shootCommand).withName("Auto: " + autoName);
-
   }
 
   public SendableChooser<String> getAutonomousChooser() {

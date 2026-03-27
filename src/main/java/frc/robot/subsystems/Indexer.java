@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static com.revrobotics.spark.SparkLowLevel.MotorType.kBrushless;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkMax;
@@ -12,6 +13,8 @@ public class Indexer extends SubsystemBase {
 
   private final SparkMax indexer_leader_;
   private final SparkMax indexer_follower_;
+  private final RelativeEncoder leader_encoder_;
+  private final RelativeEncoder follower_encoder_;
 
   private final PeriodicIO io_ = new PeriodicIO();
 
@@ -25,6 +28,7 @@ public class Indexer extends SubsystemBase {
     leader_config.idleMode(IdleMode.kCoast);
 
     indexer_leader_ = new SparkMax(Constants.kIndexerLeaderId, kBrushless);
+    leader_encoder_ = indexer_leader_.getEncoder();
     indexer_leader_.configure(leader_config, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
 
@@ -37,6 +41,7 @@ public class Indexer extends SubsystemBase {
     // leader
 
     indexer_follower_ = new SparkMax(Constants.kIndexerFollowerId, kBrushless);
+    follower_encoder_ = indexer_follower_.getEncoder();
     indexer_follower_.configure(follower_config, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
   }
@@ -46,11 +51,12 @@ public class Indexer extends SubsystemBase {
     // Read inputs
     io_.current_leader_ = indexer_leader_.getOutputCurrent();
     io_.current_follower_ = indexer_follower_.getOutputCurrent();
+    io_.leader_velocity_rpm_ = leader_encoder_.getVelocity();
+    io_.follower_velocity_rpm_ = follower_encoder_.getVelocity();
 
     // Write outputs — follower mirrors leader automatically
     indexer_leader_.set(io_.indexer_demand_);
     indexer_follower_.set(io_.indexer_demand_);
-    System.out.println("io indexer demand: " + io_.indexer_demand_);
   }
 
   /** Spin the indexer at a given percent output [-1, 1] */
@@ -75,10 +81,20 @@ public class Indexer extends SubsystemBase {
     return io_.indexer_demand_;
   }
 
+  public double getLeaderVelocityRpm() {
+    return io_.leader_velocity_rpm_;
+  }
+
+  public double getFollowerVelocityRpm() {
+    return io_.follower_velocity_rpm_;
+  }
+
   public static class PeriodicIO {
     // Inputs
     double current_leader_;
     double current_follower_;
+    double leader_velocity_rpm_;
+    double follower_velocity_rpm_;
 
     // Outputs
     double indexer_demand_;

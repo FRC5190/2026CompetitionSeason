@@ -20,10 +20,7 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
   private final RobotContainer m_robotContainer;
-  private static final String kLL = "limelight";
-  private double lastPrint = 0.0;
-
-  //private final DashboardPublisher dashboardPublisher;
+  private final DashboardPublisher dashboardPublisher;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -33,7 +30,7 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer. This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    //dashboardPublisher = new DashboardPublisher(m_robotContainer);
+    dashboardPublisher = new DashboardPublisher(m_robotContainer);
   }
 
   @Override
@@ -56,7 +53,7 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods. This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    //dashboardPublisher.update();
+    dashboardPublisher.update();
 
     // ChassisSpeeds speeds = m_robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
     // double omegaRadPerSec = speeds.omegaRadiansPerSecond;

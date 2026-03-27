@@ -130,6 +130,10 @@ public class SwerveSubsystem extends SubsystemBase {
     return swerveDrive;
   }
 
+  public Field2d getField() {
+    return field2d;
+  }
+
   public void driveFieldOriented(ChassisSpeeds velocity){
     driveFieldOrientedWithGyro(velocity);
   }
