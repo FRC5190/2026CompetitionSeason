@@ -109,24 +109,14 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+    PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue(kLL);
 
-    if (llEst != null) {
-      System.out.println("LL Tags: " + llEst.tagCount + " Pose: " + llEst.pose.getX() + ", " + llEst.pose.getY());
-      if (llEst.tagCount > 0) {
-        swerveDrive.addVisionMeasurement(llEst.pose, llEst.timestampSeconds);
-        System.out.println("FUSED Vision");
-      }      
+    if (llEst != null && llEst.tagCount > 0) {
+      swerveDrive.addVisionMeasurement(llEst.pose, llEst.timestampSeconds);
     }
 
     field2d.setRobotPose(swerveDrive.getPose());
-    //System.out.println("Swerve Pose: " + swerveDrive.getPose());
     SmartDashboard.putData("Field", field2d);
-
-
-    Pose2d pose = swerveDrive.getPose();
-    System.out.println("Robot POSE: X= " + swerveDrive.getPose());
-    System.out.println("test");
   }
 
   @Override
