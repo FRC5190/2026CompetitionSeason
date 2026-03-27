@@ -63,7 +63,7 @@ public class Superstructure {
 
   // --- Hood ---
   public Command jogHoodUp(double percent) {
-    return new StartEndCommand(() -> turret_.setHoodPercent(percent), () -> turret_.setHoodPercent(0.05),
+    return new StartEndCommand(() -> turret_.setHoodPercent(percent), () -> turret_.setHoodPercent(0.03),
         turret_);
   }
 

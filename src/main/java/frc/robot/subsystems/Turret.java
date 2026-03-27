@@ -144,7 +144,7 @@ public class Turret extends SubsystemBase {
       case BRAKE:
       default:
         hood_pid_.setSetpoint(getHoodPosition());
-        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_), -0.1, 0.1);
+        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_), -0.9, 0.9);
     }
 
     // Rotation outputs
