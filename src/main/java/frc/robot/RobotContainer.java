@@ -29,6 +29,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+  private static final String kDefaultAutonomous = "ShootOnlyAuto";
+
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
 
@@ -159,7 +161,8 @@ public class RobotContainer {
   }
 
   private void configureAutos() {
-    autonomousChooser.setDefaultOption("ScoreLeftSideAuto", "ScoreLeftSideAuto");
+    autonomousChooser.setDefaultOption(kDefaultAutonomous, kDefaultAutonomous);
+    autonomousChooser.addOption("ScoreLeftSideAuto", "ScoreLeftSideAuto");
     autonomousChooser.addOption("ScoreRightSideAuto", "ScoreRightSideAuto");
     autonomousChooser.addOption("ScoreIntakeScore", "ScoreIntakeScore");
     autonomousChooser.addOption("Simple Auto", "Simple Auto");
@@ -181,7 +184,7 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     String autoName = getResolvedAutoName();
     //Command pathCommand = drivebase.getAutonomousCommand(autoName);
-    Command shootCommand = ShootAuto.shoot(turret, indexer, intake);
+    Command shootCommand = ShootAuto.shoot(turret, indexer);
 
     // return Commands.sequence(pathCommand, shootCommand).withName("Auto: " + autoName);
     return Commands.sequence(shootCommand).withName("Auto: " + autoName);
@@ -199,7 +202,7 @@ public class RobotContainer {
   public String getResolvedAutoName() {
     String selectedAuto = autonomousChooser.getSelected();
     if (selectedAuto == null || selectedAuto.isBlank()) {
-      return "ScoreLeftSideAuto";
+      return kDefaultAutonomous;
     }
     return selectedAuto;
   }
