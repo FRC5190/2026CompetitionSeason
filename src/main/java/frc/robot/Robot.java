@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.sim.RebuiltShooterSimHarness;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -21,6 +22,7 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
   private final DashboardPublisher dashboardPublisher;
+  private RebuiltShooterSimHarness shooterSimHarness;
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -135,9 +137,16 @@ public class Robot extends TimedRobot {
 
   /** This function is called once when the robot is first started up. */
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    shooterSimHarness = new RebuiltShooterSimHarness();
+    shooterSimHarness.simulationInit();
+  }
 
   /** This function is called periodically whilst in simulation. */
   @Override
-  public void simulationPeriodic() {}
+  public void simulationPeriodic() {
+    if (shooterSimHarness != null) {
+      shooterSimHarness.simulationPeriodic();
+    }
+  }
 }
