@@ -11,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import swervelib.SwerveInputStream;
 
 /**
@@ -60,50 +61,74 @@ public class RobotContainer {
    * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
   private void configureBindings() {
-    // Driver: hold left trigger to extend the intake to the pickup position and run the intake roller.
-    m_driverController.leftTrigger().onTrue(superstructure.setExtensionPosition(1.7));
-    m_driverController.leftTrigger().whileTrue(superstructure.jogRoller(0.75));
-    // Driver: tap left bumper to retract the intake extension.
-    m_driverController.leftBumper().onTrue(superstructure.setExtensionPosition(0.0));
-    // Driver: hold right trigger to feed the indexer toward the shooter.
-    m_driverController.rightTrigger().whileTrue(superstructure.jogIndexer(-0.4));
-    // Driver: hold right bumper to reverse the indexer.
-    m_driverController.rightBumper().whileTrue(superstructure.jogIndexer(0.4));
-    // Driver: tap D-pad left to zero the swerve gyro.
-    m_driverController.povLeft().onTrue(Commands.runOnce(drivebase::resetGyro, drivebase));
-    // Driver: hold D-pad up to manually extend the intake.
-    m_driverController.povUp().whileTrue(superstructure.jogExtension(0.25));
-    // Driver: hold D-pad down to manually retract the intake.
-    m_driverController.povDown().whileTrue(superstructure.jogExtension(-0.7));
-    // Driver: hold Y to raise the hood, then hold current angle on release.
-    m_driverController.y().whileTrue(superstructure.jogHoodUp(0.45));
-    // Driver: hold A to lower the hood, then hold current angle on release.
-    m_driverController.a().whileTrue(superstructure.jogHoodUp(-0.02));
+    // // Driver: hold left trigger to extend the intake to the pickup position and run the intake roller.
+    // m_driverController.leftTrigger().onTrue(superstructure.setExtensionPosition(1.3));
+    // m_driverController.leftTrigger().whileTrue(superstructure.jogRoller(0.75));
+    // // Driver: tap left bumper to retract the intake extension.
+    // m_driverController.leftBumper().onTrue(superstructure.setExtensionPosition(0.0));
+    // // Driver: hold right trigger to feed the indexer toward the shooter.
+    // m_driverController.rightTrigger().whileTrue(superstructure.jogIndexer(-0.4));
+    // // Driver: hold right bumper to reverse the indexer.
+    // m_driverController.rightBumper().whileTrue(superstructure.jogIndexer(0.4));
+    // // Driver: tap D-pad left to zero the swerve gyro.
+    // m_driverController.povLeft().onTrue(Commands.runOnce(drivebase::resetGyro, drivebase));
+    // // Driver: hold D-pad up to manually extend the intake.
+    // m_driverController.povUp().whileTrue(superstructure.jogExtension(0.25));
+    // // Driver: hold D-pad down to manually retract the intake.
+    // m_driverController.povDown().whileTrue(superstructure.jogExtension(-0.7));
+    // // Driver: hold Y to raise the hood, then hold current angle on release.
+    // m_driverController.y().whileTrue(superstructure.jogHoodUp(0.05));
+    // // Driver: hold A to lower the hood, then hold current angle on release.
+    // m_driverController.a().whileTrue(superstructure.jogHoodUp(-0.02));
 
-    // Operator: hold Y for the lowest flywheel speed preset.
-    m_operatorController.y().whileTrue(superstructure.runFlywheel(0.25));
-    // Operator: hold B for the second flywheel speed preset.
-    m_operatorController.b().whileTrue(superstructure.runFlywheel(0.35));
-    // Operator: hold A for the third flywheel speed preset.
-    m_operatorController.a().whileTrue(superstructure.runFlywheel(0.45));
-    // Operator: hold X for the highest flywheel speed preset.
-    m_operatorController.x().whileTrue(superstructure.runFlywheel(0.55));
-    // Operator: tap D-pad up for the lowest hood angle preset.
-    m_operatorController.povUp().onTrue(superstructure.setHoodPosition(10.0));
-    // Operator: tap D-pad right for the second hood angle preset.
-    m_operatorController.povRight().onTrue(superstructure.setHoodPosition(20.0));
-    // Operator: tap D-pad down for the third hood angle preset.
-    m_operatorController.povDown().onTrue(superstructure.setHoodPosition(30.0));
-    // Operator: tap D-pad left for the highest hood angle preset.
-    m_operatorController.povLeft().onTrue(superstructure.setHoodPosition(40.0));
-    // Operator: hold left trigger to run the intake roller inward.
-    m_operatorController.leftTrigger().whileTrue(superstructure.jogRoller(0.75));
-    // Operator: hold right trigger to run the intake roller in reverse.
-    m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(-0.75));
-    // Operator: hold left bumper to feed the indexer forward.
-    m_operatorController.leftBumper().whileTrue(superstructure.jogIndexer(-0.4));
-    // Operator: hold right bumper to reverse the indexer.
-    m_operatorController.rightBumper().whileTrue(superstructure.jogIndexer(0.4));
+    // // Operator: hold Y for the lowest flywheel speed preset.
+    // m_operatorController.y().whileTrue(superstructure.runFlywheel(0.25));
+    // // Operator: hold B for the second flywheel speed preset.
+    // m_operatorController.b().whileTrue(superstructure.runFlywheel(0.35));
+    // // Operator: hold A for the third flywheel speed preset.
+    // m_operatorController.a().whileTrue(superstructure.runFlywheel(0.45));
+    // // Operator: hold X for the highest flywheel speed preset.
+    // m_operatorController.x().whileTrue(superstructure.runFlywheel(0.55));
+    // // Operator: tap D-pad up for the lowest hood angle preset.
+    // m_operatorController.povUp().onTrue(superstructure.setHoodPosition(10.0));
+    // // Operator: tap D-pad right for the second hood angle preset.
+    // m_operatorController.povRight().onTrue(superstructure.setHoodPosition(20.0));
+    // // Operator: tap D-pad down for the third hood angle preset.
+    // m_operatorController.povDown().onTrue(superstructure.setHoodPosition(30.0));
+    // // Operator: tap D-pad left for the highest hood angle preset.
+    // m_operatorController.povLeft().onTrue(superstructure.setHoodPosition(40.0));
+    // // Operator: hold left trigger to run the intake roller inward.
+    // m_operatorController.leftTrigger().whileTrue(superstructure.jogRoller(0.75));
+    // // Operator: hold right trigger to run the intake roller in reverse.
+    // m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(-0.75));
+    // // Operator: hold left bumper to feed the indexer forward.
+    // m_operatorController.leftBumper().whileTrue(superstructure.jogIndexer(-0.4));
+    // // Operator: hold right bumper to reverse the indexer.
+    // m_operatorController.rightBumper().whileTrue(superstructure.jogIndexer(0.4));
+//****************************
+    // m_driverController.b().and(new Trigger(() -> drivebase.seesTag(26))).
+    // whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
+
+    m_driverController.leftTrigger().whileTrue(superstructure.jogIndexer(-0.4));
+    m_driverController.rightTrigger().whileTrue(superstructure.runFlywheel(-0.45));
+    m_driverController.leftBumper().whileTrue(superstructure.jogIndexer(0.4));
+    m_driverController.rightBumper().whileTrue(superstructure.runFlywheel(0.45));
+    m_driverController.a().onTrue(superstructure.setExtensionPosition(1.7));
+
+
+    // m_operatorController.y().whileTrue(superstructure.jogHoodUp(0.75));
+    //m_operatorController.a().whileTrue(superstructure.jogHoodUp(-0.02));  
+  //m_operatorController.b().whileTrue(superstructure.setHoodPosition(30));
+
+
+   m_operatorController.rightBumper().whileTrue(superstructure.jogExtension(0.5));
+  m_operatorController.leftTrigger().whileTrue(superstructure.jogExtension(-0.7));
+
+  m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(0.75));
+  m_operatorController.leftBumper().whileTrue(superstructure.jogRoller(-0.75));
+
+  
+
   }
 
   private void configureAutos() {
@@ -121,7 +146,7 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     String autoName = getResolvedAutoName();
-    Command shootCommand = ShootAuto.shoot(turret, indexer);
+    Command shootCommand = ShootAuto.shoot(superstructure, vision);
     return Commands.sequence(shootCommand).withName("Auto: " + autoName);
   }
 

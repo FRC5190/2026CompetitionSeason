@@ -89,6 +89,8 @@ public class Indexer extends SubsystemBase {
     return io_.follower_velocity_rpm_;
   }
 
+  
+
   public static class PeriodicIO {
     // Inputs
     double current_leader_;
