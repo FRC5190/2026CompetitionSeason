@@ -15,9 +15,12 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import swervelib.SwerveInputStream;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -34,7 +37,9 @@ public class RobotContainer {
   private final CommandXboxController m_driverController = new CommandXboxController(1);
   private final CommandXboxController m_operatorController = new CommandXboxController(2);
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     configureAutos();
     // Configure the trigger bindings
@@ -52,16 +57,22 @@ public class RobotContainer {
   Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
 
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named factories in
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses
+   * for
    * {@link CommandXboxController
-   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4} controllers or
-   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
+   * controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * joysticks}.
    */
   private void configureBindings() {
-    // // Driver: hold left trigger to extend the intake to the pickup position and run the intake roller.
+    // // Driver: hold left trigger to extend the intake to the pickup position and
+    // run the intake roller.
     // m_driverController.leftTrigger().onTrue(superstructure.setExtensionPosition(1.3));
     // m_driverController.leftTrigger().whileTrue(superstructure.jogRoller(0.75));
     // // Driver: tap left bumper to retract the intake extension.
@@ -71,7 +82,8 @@ public class RobotContainer {
     // // Driver: hold right bumper to reverse the indexer.
     // m_driverController.rightBumper().whileTrue(superstructure.jogIndexer(0.4));
     // // Driver: tap D-pad left to zero the swerve gyro.
-    // m_driverController.povLeft().onTrue(Commands.runOnce(drivebase::resetGyro, drivebase));
+    // m_driverController.povLeft().onTrue(Commands.runOnce(drivebase::resetGyro,
+    // drivebase));
     // // Driver: hold D-pad up to manually extend the intake.
     // m_driverController.povUp().whileTrue(superstructure.jogExtension(0.25));
     // // Driver: hold D-pad down to manually retract the intake.
@@ -105,29 +117,25 @@ public class RobotContainer {
     // m_operatorController.leftBumper().whileTrue(superstructure.jogIndexer(-0.4));
     // // Operator: hold right bumper to reverse the indexer.
     // m_operatorController.rightBumper().whileTrue(superstructure.jogIndexer(0.4));
-//****************************
+    // ****************************
     // m_driverController.b().and(new Trigger(() -> drivebase.seesTag(26))).
     // whileTrue(drivebase.alignToOffset(-0.5, 0.5, 0, 26));
 
-    m_driverController.leftTrigger().whileTrue(superstructure.jogIndexer(-0.4));
+    m_driverController.leftTrigger().whileTrue(superstructure.jogIndexerReverseIfStuck(-0.4));
     m_driverController.rightTrigger().whileTrue(superstructure.runFlywheel(-0.45));
     m_driverController.leftBumper().whileTrue(superstructure.jogIndexer(0.4));
     m_driverController.rightBumper().whileTrue(superstructure.runFlywheel(0.45));
     m_driverController.a().onTrue(superstructure.setExtensionPosition(1.7));
 
-
     // m_operatorController.y().whileTrue(superstructure.jogHoodUp(0.75));
-    //m_operatorController.a().whileTrue(superstructure.jogHoodUp(-0.02));  
-  //m_operatorController.b().whileTrue(superstructure.setHoodPosition(30));
+    // m_operatorController.a().whileTrue(superstructure.jogHoodUp(-0.02));
+    // m_operatorController.b().whileTrue(superstructure.setHoodPosition(30));
 
+    m_operatorController.rightBumper().whileTrue(superstructure.jogExtension(0.5));
+    m_operatorController.leftTrigger().whileTrue(superstructure.jogExtension(-0.7));
 
-   m_operatorController.rightBumper().whileTrue(superstructure.jogExtension(0.5));
-  m_operatorController.leftTrigger().whileTrue(superstructure.jogExtension(-0.7));
-
-  m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(0.75));
-  m_operatorController.leftBumper().whileTrue(superstructure.jogRoller(-0.75));
-
-  
+    m_operatorController.rightTrigger().whileTrue(superstructure.jogRoller(0.75));
+    m_operatorController.leftBumper().whileTrue(superstructure.jogRoller(-0.75));
 
   }
 
