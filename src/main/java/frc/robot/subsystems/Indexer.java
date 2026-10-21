@@ -37,7 +37,8 @@ public class Indexer extends SubsystemBase {
     follower_config.voltageCompensation(12);
     follower_config.smartCurrentLimit(Constants.kCurrentLimit);
     follower_config.idleMode(IdleMode.kCoast);
-    // follower_config.follow(Constants.kIndexerLeaderId, false); // false = same direction as
+    // follower_config.follow(Constants.kIndexerLeaderId, false); // false = same
+    // direction as
     // leader
 
     indexer_follower_ = new SparkMax(Constants.kIndexerFollowerId, kBrushless);
@@ -89,7 +90,29 @@ public class Indexer extends SubsystemBase {
     return io_.follower_velocity_rpm_;
   }
 
-  
+  public double getDebounce() {
+    return io_.debounce;
+  }
+
+  public void resetDebounce() {
+    io_.debounce = PeriodicIO.InitDebounce;
+  }
+
+  public void decrementDebounce(double dt) {
+    io_.debounce -= dt;
+  }
+
+  public void periodicReverseIfStuck(double value, double dt) {
+    this.decrementDebounce(dt);
+    if (this.getDebounce() < 0) {
+      if (Math.abs(this.getLeaderVelocityRpm()) < 5) {
+        this.setPercent(-value);
+      } else {
+        this.setPercent(value);
+      }
+      this.resetDebounce();
+    }
+  }
 
   public static class PeriodicIO {
     // Inputs
@@ -100,6 +123,10 @@ public class Indexer extends SubsystemBase {
 
     // Outputs
     double indexer_demand_;
+
+    // how much to wait before revserse if stuck
+    public static final double InitDebounce = 0.5;
+    double debounce = InitDebounce;
   }
 
   public static class Constants {

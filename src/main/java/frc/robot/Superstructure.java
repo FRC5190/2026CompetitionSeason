@@ -1,8 +1,15 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.Seconds;
+
+import org.opencv.features2d.FlannBasedMatcher;
+
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
@@ -30,13 +37,14 @@ public class Superstructure {
   }
 
   // public Command extendIntakeRoll(double percent) {
-  //   return new ParallelCommandGroup(jogRoller(percent), setExtensionPosition(3.5));
+  // return new ParallelCommandGroup(jogRoller(percent),
+  // setExtensionPosition(3.5));
   // }
 
   // public Command indexerAndShooter(double percent) {
-  //   return new ParallelCommandGroup(jogIndexer(-1 * percent), runFlywheel(percent));
+  // return new ParallelCommandGroup(jogIndexer(-1 * percent),
+  // runFlywheel(percent));
   // }
-
 
   // Roller jog
   public Command jogRoller(double percent) {
@@ -55,6 +63,26 @@ public class Superstructure {
     return new StartEndCommand(() -> indexer_.setPercent(percent), () -> indexer_.stop(), indexer_);
   }
 
+  public Command jogIndexerReverseIfStuck(double percent) {
+    final Timer timer = new Timer();
+    return new FunctionalCommand(
+        () -> {
+          indexer_.setPercent(percent);
+          indexer_.resetDebounce();
+        },
+        () -> {
+          double dt = timer.get();
+          timer.reset();
+          timer.start();
+          indexer_.periodicReverseIfStuck(percent, dt);
+        },
+        interrupted -> {
+          indexer_.stop();
+        },
+        () -> false,
+        indexer_);
+  }
+
   // --- Flywheel ---
   public Command runFlywheel(double percent) {
     return new StartEndCommand(() -> turret_.setFlywheelPercent(percent),
@@ -67,10 +95,9 @@ public class Superstructure {
         turret_);
   }
 
-  
-
   // public Command jogHoodDown() {
-  // return new StartEndCommand(() -> turret_.setHoodPercent(-Constants.kHoodJogPercent),
+  // return new StartEndCommand(() ->
+  // turret_.setHoodPercent(-Constants.kHoodJogPercent),
   // () -> turret_.stopHood(), turret_);
   // }
 
@@ -82,8 +109,9 @@ public class Superstructure {
 
   // --- Rotation ---
   // public Command jogRotationLeft() {
-  //   return new StartEndCommand(() -> turret_.setRotationPercent(-Constants.kRotationJogPercent),
-  //       () -> turret_.stopRotation(), turret_);
+  // return new StartEndCommand(() ->
+  // turret_.setRotationPercent(-Constants.kRotationJogPercent),
+  // () -> turret_.stopRotation(), turret_);
   // }
 
   public Command jogRotationRight(double percent) {
@@ -106,7 +134,6 @@ public class Superstructure {
       }
     }, turret_);
   }
-
 
   public static class Constants {
     public static final double kHoodJogPercent = 0.2;
