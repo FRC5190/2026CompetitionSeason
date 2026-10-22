@@ -106,7 +106,7 @@ public class Indexer extends SubsystemBase {
     this.decrementDebounce(dt);
     if (this.getDebounce() < 0) {
       if (Math.abs(this.getLeaderVelocityRpm()) < 5) {
-        this.setPercent(-value);
+        this.setPercent(-this.getIndexerPercent());
       } else {
         this.setPercent(value);
       }
