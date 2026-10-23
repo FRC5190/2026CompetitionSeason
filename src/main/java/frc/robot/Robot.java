@@ -17,9 +17,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * this project, you must also update the Main.java file in the project.
  */
 public class Robot extends TimedRobot {
-  private Command m_autonomousCommand;
+  private Command autonomousCommand;
 
-  private final RobotContainer m_robotContainer;
+  private final RobotContainer robotContainer;
   //private final DashboardPublisher dashboardPublisher;
 
   /**
@@ -29,8 +29,8 @@ public class Robot extends TimedRobot {
   public Robot() {
     // Instantiate our RobotContainer. This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
-    //dashboardPublisher = new DashboardPublisher(m_robotContainer);
+    robotContainer = new RobotContainer();
+    //dashboardPublisher = new DashboardPublisher(robotContainer);
   }
 
   @Override
@@ -55,20 +55,20 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     //dashboardPublisher.update();
 
-    // ChassisSpeeds speeds = m_robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
+    // ChassisSpeeds speeds = robotContainer.drivebase.getSwerveDrive().getRobotVelocity();
     // double omegaRadPerSec = speeds.omegaRadiansPerSecond;
     // double omegaRps = omegaRadPerSec / (2.0 * Math.PI); // rotations per second
     // var llMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
 
     // if (llMeasurement != null && llMeasurement.tagCount > 0 && Math.abs(omegaRps) < 2.0) {
-    // m_robotContainer.drivebase.resetOdometry(llMeasurement.pose);
+    // robotContainer.drivebase.resetOdometry(llMeasurement.pose);
     // }
 
-    // double tx = LimelightHelpers.getTX(kLL);
-    // boolean tv = LimelightHelpers.getTV(kLL);
-    // double ty = LimelightHelpers.getTY(kLL);
-    // double ta = LimelightHelpers.getTA(kLL);
-    // double tagId = LimelightHelpers.getFiducialID(kLL);
+    // double tx = LimelightHelpers.getTX(kLimelightName);
+    // boolean tv = LimelightHelpers.getTV(kLimelightName);
+    // double ty = LimelightHelpers.getTY(kLimelightName);
+    // double ta = LimelightHelpers.getTA(kLimelightName);
+    // double tagId = LimelightHelpers.getFiducialID(kLimelightName);
 
     // SmartDashboard.putNumber("LL/tx", tx);
     // SmartDashboard.putNumber("LL/ty", ty);
@@ -92,11 +92,11 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    autonomousCommand = robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      CommandScheduler.getInstance().schedule(m_autonomousCommand);
+    if (autonomousCommand != null) {
+      CommandScheduler.getInstance().schedule(autonomousCommand);
     }
   }
 
@@ -110,8 +110,8 @@ public class Robot extends TimedRobot {
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
     // this line or comment it out.
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.cancel();
+    if (autonomousCommand != null) {
+      autonomousCommand.cancel();
     }
   }
 

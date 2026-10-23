@@ -11,122 +11,122 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 public class Indexer extends SubsystemBase {
 
-  private final SparkMax indexer_leader_;
-  private final SparkMax indexer_follower_;
-  private final RelativeEncoder leader_encoder_;
-  private final RelativeEncoder follower_encoder_;
+  private final SparkMax leaderMotor;
+  private final SparkMax followerMotor;
+  private final RelativeEncoder leaderEncoder;
+  private final RelativeEncoder followerEncoder;
 
-  private final PeriodicIO io_ = new PeriodicIO();
+  private final PeriodicIO periodicIO = new PeriodicIO();
 
   public Indexer() {
 
     // --- Indexer Leader ---
-    SparkMaxConfig leader_config = new SparkMaxConfig();
-    leader_config.voltageCompensation(12);
-    leader_config.smartCurrentLimit(Constants.kCurrentLimit);
-    leader_config.inverted(false);
-    leader_config.idleMode(IdleMode.kCoast);
+    SparkMaxConfig leaderConfig = new SparkMaxConfig();
+    leaderConfig.voltageCompensation(12);
+    leaderConfig.smartCurrentLimit(Constants.kCurrentLimit);
+    leaderConfig.inverted(false);
+    leaderConfig.idleMode(IdleMode.kCoast);
 
-    indexer_leader_ = new SparkMax(Constants.kIndexerLeaderId, kBrushless);
-    leader_encoder_ = indexer_leader_.getEncoder();
-    indexer_leader_.configure(leader_config, com.revrobotics.ResetMode.kResetSafeParameters,
+    leaderMotor = new SparkMax(Constants.kIndexerLeaderId, kBrushless);
+    leaderEncoder = leaderMotor.getEncoder();
+    leaderMotor.configure(leaderConfig, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
 
     // --- Indexer Follower (same direction as leader) ---
-    SparkMaxConfig follower_config = new SparkMaxConfig();
-    follower_config.voltageCompensation(12);
-    follower_config.smartCurrentLimit(Constants.kCurrentLimit);
-    follower_config.idleMode(IdleMode.kCoast);
-    // follower_config.follow(Constants.kIndexerLeaderId, false); // false = same
+    SparkMaxConfig followerConfig = new SparkMaxConfig();
+    followerConfig.voltageCompensation(12);
+    followerConfig.smartCurrentLimit(Constants.kCurrentLimit);
+    followerConfig.idleMode(IdleMode.kCoast);
+    // followerConfig.follow(Constants.kIndexerLeaderId, false); // false = same
     // direction as
     // leader
 
-    indexer_follower_ = new SparkMax(Constants.kIndexerFollowerId, kBrushless);
-    follower_encoder_ = indexer_follower_.getEncoder();
-    indexer_follower_.configure(follower_config, com.revrobotics.ResetMode.kResetSafeParameters,
+    followerMotor = new SparkMax(Constants.kIndexerFollowerId, kBrushless);
+    followerEncoder = followerMotor.getEncoder();
+    followerMotor.configure(followerConfig, com.revrobotics.ResetMode.kResetSafeParameters,
         com.revrobotics.PersistMode.kPersistParameters);
   }
 
   @Override
   public void periodic() {
     // Read inputs
-    io_.current_leader_ = indexer_leader_.getOutputCurrent();
-    io_.current_follower_ = indexer_follower_.getOutputCurrent();
-    io_.leader_velocity_rpm_ = leader_encoder_.getVelocity();
-    io_.follower_velocity_rpm_ = follower_encoder_.getVelocity();
+    periodicIO.leaderCurrentAmps = leaderMotor.getOutputCurrent();
+    periodicIO.followerCurrentAmps = followerMotor.getOutputCurrent();
+    periodicIO.leaderVelocityRpm = leaderEncoder.getVelocity();
+    periodicIO.followerVelocityRpm = followerEncoder.getVelocity();
 
     // Write outputs — follower mirrors leader automatically
-    indexer_leader_.set(io_.indexer_demand_);
-    indexer_follower_.set(io_.indexer_demand_);
+    leaderMotor.set(periodicIO.demand);
+    followerMotor.set(periodicIO.demand);
   }
 
   /** Spin the indexer at a given percent output [-1, 1] */
-  public void setPercent(double value) {
-    io_.indexer_demand_ = value;
+  public void setPercent(double requestedPercent) {
+    periodicIO.demand = requestedPercent;
   }
 
   /** Stop the indexer */
   public void stop() {
-    io_.indexer_demand_ = 0;
+    periodicIO.demand = 0;
   }
 
   public double getLeaderCurrent() {
-    return io_.current_leader_;
+    return periodicIO.leaderCurrentAmps;
   }
 
   public double getFollowerCurrent() {
-    return io_.current_follower_;
+    return periodicIO.followerCurrentAmps;
   }
 
   public double getIndexerPercent() {
-    return io_.indexer_demand_;
+    return periodicIO.demand;
   }
 
   public double getLeaderVelocityRpm() {
-    return io_.leader_velocity_rpm_;
+    return periodicIO.leaderVelocityRpm;
   }
 
   public double getFollowerVelocityRpm() {
-    return io_.follower_velocity_rpm_;
+    return periodicIO.followerVelocityRpm;
   }
 
-  public double getDebounce() {
-    return io_.debounce;
+  public double getReverseCheckTimeRemainingSeconds() {
+    return periodicIO.reverseCheckTimeRemainingSeconds;
   }
 
-  public void resetDebounce() {
-    io_.debounce = PeriodicIO.InitDebounce;
+  public void resetReverseCheckTimer() {
+    periodicIO.reverseCheckTimeRemainingSeconds = PeriodicIO.kReverseCheckIntervalSeconds;
   }
 
-  public void decrementDebounce(double dt) {
-    io_.debounce -= dt;
+  public void decrementReverseCheckTimer(double elapsedSeconds) {
+    periodicIO.reverseCheckTimeRemainingSeconds -= elapsedSeconds;
   }
 
-  public void periodicReverseIfStuck(double value, double dt) {
-    this.decrementDebounce(dt);
-    if (this.getDebounce() < 0) {
+  public void updateJamRecovery(double requestedPercent, double elapsedSeconds) {
+    this.decrementReverseCheckTimer(elapsedSeconds);
+    if (this.getReverseCheckTimeRemainingSeconds() < 0) {
       if (Math.abs(this.getLeaderVelocityRpm()) < 5) {
-        this.setPercent(-value);
+        this.setPercent(-requestedPercent);
       } else {
-        this.setPercent(value);
+        this.setPercent(requestedPercent);
       }
-      this.resetDebounce();
+      this.resetReverseCheckTimer();
     }
   }
 
   public static class PeriodicIO {
     // Inputs
-    double current_leader_;
-    double current_follower_;
-    double leader_velocity_rpm_;
-    double follower_velocity_rpm_;
+    double leaderCurrentAmps;
+    double followerCurrentAmps;
+    double leaderVelocityRpm;
+    double followerVelocityRpm;
 
     // Outputs
-    double indexer_demand_;
+    double demand;
 
     // how much to wait before revserse if stuck
-    public static final double InitDebounce = 0.5;
-    double debounce = InitDebounce;
+    public static final double kReverseCheckIntervalSeconds = 0.5;
+    double reverseCheckTimeRemainingSeconds = kReverseCheckIntervalSeconds;
   }
 
   public static class Constants {

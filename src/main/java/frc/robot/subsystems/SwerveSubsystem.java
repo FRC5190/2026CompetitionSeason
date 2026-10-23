@@ -1,23 +1,13 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import frc.robot.LimelightHelpers;
-import frc.robot.LimelightHelpers.PoseEstimate;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.math.geometry.Pose3d;
+import static edu.wpi.first.units.Units.Meter;
 
-import java.io.File;
-import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import swervelib.parser.SwerveParser;
-import swervelib.telemetry.SwerveDriveTelemetry;
-import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
-import swervelib.SwerveDrive;
-import swervelib.SwerveInputStream;
-import edu.wpi.first.apriltag.AprilTag;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,39 +16,33 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.commands.PathfindingCommand;
-import com.pathplanner.lib.config.PIDConstants;
-import com.pathplanner.lib.config.RobotConfig;
-import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.path.PathConstraints;
-import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.util.DriveFeedforwards;
-import com.pathplanner.lib.util.swerve.SwerveSetpoint;
-import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
-import static edu.wpi.first.units.Units.Meter;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
+import frc.robot.LimelightHelpers.PoseEstimate;
+import java.io.File;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+import swervelib.SwerveDrive;
+import swervelib.SwerveInputStream;
+import swervelib.parser.SwerveParser;
+import swervelib.telemetry.SwerveDriveTelemetry;
+import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase {
 
-  File directory = new File(Filesystem.getDeployDirectory(),"swerve");
-  SwerveDrive  swerveDrive;
+  private final File swerveConfigDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
+  private final SwerveDrive swerveDrive;
   private final AprilTagFieldLayout fieldLayout;
   private final Field2d field2d = new Field2d();
-  private static final String kLL = "limelight"; // change if you renamed in LL UI
+  private static final String kLimelightName = "limelight"; // change if you renamed in LL UI
 
 
 
@@ -68,18 +52,18 @@ public class SwerveSubsystem extends SubsystemBase {
     try
       {
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
-        swerveDrive = new SwerveParser(directory).createSwerveDrive(Constants.maximumSpeed, new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
+        swerveDrive = new SwerveParser(swerveConfigDirectory).createSwerveDrive(Constants.kMaximumSpeed, new Pose2d(new Translation2d(Meter.of(1), Meter.of(4)), Rotation2d.fromDegrees(0)));
         fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltWelded);
         SmartDashboard.putData("Field", field2d);
 
         // Alternative method if you don't want to supply the conversion factor via JSON files.
-        // swerveDrive = new SwerveParser(directory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
+        // swerveDrive = new SwerveParser(swerveConfigDirectory).createSwerveDrive(maximumSpeed, angleConversionFactor, driveConversionFactor);
       } catch (Exception e)
       {
         throw new RuntimeException(e);
       }
 
-      setUpPathPlanner();
+      configurePathPlanner();
   }
 
   /**
@@ -109,10 +93,10 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue(kLL);
+    PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(kLimelightName);
 
-    if (llEst != null && llEst.tagCount > 0) {
-      swerveDrive.addVisionMeasurement(llEst.pose, llEst.timestampSeconds);
+    if (poseEstimate != null && poseEstimate.tagCount > 0) {
+      swerveDrive.addVisionMeasurement(poseEstimate.pose, poseEstimate.timestampSeconds);
     }
 
     field2d.setRobotPose(swerveDrive.getPose());
@@ -152,7 +136,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   
   
-  public void setUpPathPlanner() {
+  private void configurePathPlanner() {
     try {
       RobotConfig config = RobotConfig.fromGUISettings();
       final boolean enableFeedForward = true;
@@ -241,22 +225,22 @@ public class SwerveSubsystem extends SubsystemBase {
 // }
 
 public boolean seesTag(int tagId){
-  int currentTag = (int) LimelightHelpers.getFiducialID(kLL);
-  return currentTag == tagId;
+  int currentTagId = (int) LimelightHelpers.getFiducialID(kLimelightName);
+  return currentTagId == tagId;
 }
 
 public Command alignToOffset(double xOffset, double yOffset, double rotationDegrees, int targetTagId) {
   return Commands.defer(() -> {
     // Get the robot's pose in target space (relative to the AprilTag)
-    PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLL);
+    PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightName);
    
-    if (llEst == null || llEst.tagCount == 0) {
+    if (poseEstimate == null || poseEstimate.tagCount == 0) {
       System.out.println("No AprilTag visible - cannot align");
       return Commands.none();
     }
    
     // Get the current tag ID being tracked
-    int tagId = (int) LimelightHelpers.getFiducialID(kLL);
+    int tagId = (int) LimelightHelpers.getFiducialID(kLimelightName);
 
     if (tagId != targetTagId){
       System.out.println("Wrong Tag! Seeing tag " + tagId + ", want tag " + targetTagId);
@@ -269,14 +253,14 @@ public Command alignToOffset(double xOffset, double yOffset, double rotationDegr
     }
    
     // Get the tag's field pose
-    Optional<Pose2d> tagPoseOpt = getTagPose(tagId);
+    Optional<Pose2d> tagPoseOption = getTagPose(tagId);
    
-    if (tagPoseOpt.isEmpty()) {
+    if (tagPoseOption.isEmpty()) {
       System.out.println("Could not find tag " + tagId + " in field layout");
       return Commands.none();
     }
    
-    Pose2d tagPose = tagPoseOpt.get();
+    Pose2d tagPose = tagPoseOption.get();
 
     //System.out.println("Tag " + targetTagId + " orientation: " + tagPose.getRotation().getDegrees());
    
@@ -314,15 +298,15 @@ public Command alignToOffset(double xOffset, double yOffset, double rotationDegr
   }, Set.of(this));
   // .until(() -> {
   //   // Stop when we're close enough
-  //   PoseEstimate llEst = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLL);
-  //   if (llEst == null || llEst.tagCount == 0) return true;
+  //   PoseEstimate poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightName);
+  //   if (poseEstimate == null || poseEstimate.tagCount == 0) return true;
    
-  //   int tagId = (int) LimelightHelpers.getFiducialID(kLL);
-  //   Optional<Pose2d> tagPoseOpt = getTagPose(tagId);
+  //   int tagId = (int) LimelightHelpers.getFiducialID(kLimelightName);
+  //   Optional<Pose2d> tagPoseOption = getTagPose(tagId);
    
-  //   if (tagPoseOpt.isEmpty()) return true;
+  //   if (tagPoseOption.isEmpty()) return true;
    
-  //   Pose2d tagPose = tagPoseOpt.get();
+  //   Pose2d tagPose = tagPoseOption.get();
   //   Transform2d offset = new Transform2d(
   //     new Translation2d(xOffset, yOffset),
   //     Rotation2d.fromDegrees(rotationDegrees).minus(tagPose.getRotation())
@@ -340,14 +324,7 @@ public Command alignToOffset(double xOffset, double yOffset, double rotationDegr
  * Helper method to get a tag's pose from the field layout
  */
 private Optional<Pose2d> getTagPose(int tagId) {
-  Optional<AprilTag> tag = fieldLayout.getTagPose(tagId)
-    .map(pose3d -> new AprilTag(tagId, pose3d));
- 
-  if (tag.isPresent()) {
-    return Optional.of(tag.get().pose.toPose2d());
-  }
- 
-  return Optional.empty();
+  return fieldLayout.getTagPose(tagId).map(pose3d -> pose3d.toPose2d());
 }
 
 }

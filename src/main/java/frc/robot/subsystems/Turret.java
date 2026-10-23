@@ -16,173 +16,173 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Turret extends SubsystemBase {
 
   // Flywheel motors
-  private final SparkMax flywheel_leader_;
-  private final SparkMax flywheel_follower_;
-  private final RelativeEncoder flywheel_leader_encoder_;
-  private final RelativeEncoder flywheel_follower_encoder_;
+  private final SparkMax flywheelLeaderMotor;
+  private final SparkMax flywheelFollowerMotor;
+  private final RelativeEncoder flywheelLeaderEncoder;
+  private final RelativeEncoder flywheelFollowerEncoder;
 
   // Hood motor
-  private final SparkMax hood_;
-  private final RelativeEncoder hood_encoder_;
-  private final PIDController hood_pid_;
+  private final SparkMax hoodMotor;
+  private final RelativeEncoder hoodEncoder;
+  private final PIDController hoodPid;
 
   // Rotation motor
-  private final SparkMax rotation_;
-  private final RelativeEncoder rotation_encoder_;
-  private final PIDController rotation_pid_;
-  private final SparkAbsoluteEncoder bore_encoder_;
+  private final SparkMax rotationMotor;
+  private final RelativeEncoder rotationEncoder;
+  private final PIDController rotationPid;
+  private final SparkAbsoluteEncoder absoluteRotationEncoder;
 
   // Periodic IO
-  private final PeriodicIO io_ = new PeriodicIO();
-  private OutputType hood_output_type_ = OutputType.PERCENT;
-  private OutputType rotation_output_type_ = OutputType.BRAKE;
+  private final PeriodicIO periodicIO = new PeriodicIO();
+  private ControlMode hoodControlMode = ControlMode.PERCENT;
+  private ControlMode rotationControlMode = ControlMode.BRAKE;
 
   public Turret() {
     // Flywheel leader
-    SparkMaxConfig flywheel_leader_config = new SparkMaxConfig();
-    flywheel_leader_config.voltageCompensation(Constants.kVoltageCompensation);
-    flywheel_leader_config.smartCurrentLimit(Constants.kFlywheelCurrentLimit);
-    flywheel_leader_config.inverted(Constants.kFlywheelLeaderInverted);
-    flywheel_leader_config.idleMode(IdleMode.kCoast);
-    flywheel_leader_config.encoder.positionConversionFactor(1.0 / Constants.kFlywheelGearRatio);
-    flywheel_leader_config.encoder.velocityConversionFactor(1.0 / Constants.kFlywheelGearRatio);
-    flywheel_leader_ = new SparkMax(Constants.kFlywheelLeaderId, kBrushless);
-    flywheel_leader_encoder_ = flywheel_leader_.getEncoder();
+    SparkMaxConfig flywheelLeaderConfig = new SparkMaxConfig();
+    flywheelLeaderConfig.voltageCompensation(Constants.kVoltageCompensation);
+    flywheelLeaderConfig.smartCurrentLimit(Constants.kFlywheelCurrentLimit);
+    flywheelLeaderConfig.inverted(Constants.kFlywheelLeaderInverted);
+    flywheelLeaderConfig.idleMode(IdleMode.kCoast);
+    flywheelLeaderConfig.encoder.positionConversionFactor(1.0 / Constants.kFlywheelGearRatio);
+    flywheelLeaderConfig.encoder.velocityConversionFactor(1.0 / Constants.kFlywheelGearRatio);
+    flywheelLeaderMotor = new SparkMax(Constants.kFlywheelLeaderId, kBrushless);
+    flywheelLeaderEncoder = flywheelLeaderMotor.getEncoder();
 
-    flywheel_leader_.configure(flywheel_leader_config, ResetMode.kResetSafeParameters,
+    flywheelLeaderMotor.configure(flywheelLeaderConfig, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
     // Flywheel follower
-    SparkMaxConfig flywheel_follower_config = new SparkMaxConfig();
-    flywheel_follower_config.voltageCompensation(Constants.kVoltageCompensation);
-    flywheel_follower_config.smartCurrentLimit(Constants.kFlywheelCurrentLimit);
-    flywheel_follower_config.idleMode(IdleMode.kCoast);
-    flywheel_follower_config.encoder.positionConversionFactor(1.0 / Constants.kFlywheelGearRatio);
-    flywheel_follower_config.encoder.velocityConversionFactor(1.0 / Constants.kFlywheelGearRatio);
-    flywheel_follower_config.follow(Constants.kFlywheelLeaderId,
+    SparkMaxConfig flywheelFollowerConfig = new SparkMaxConfig();
+    flywheelFollowerConfig.voltageCompensation(Constants.kVoltageCompensation);
+    flywheelFollowerConfig.smartCurrentLimit(Constants.kFlywheelCurrentLimit);
+    flywheelFollowerConfig.idleMode(IdleMode.kCoast);
+    flywheelFollowerConfig.encoder.positionConversionFactor(1.0 / Constants.kFlywheelGearRatio);
+    flywheelFollowerConfig.encoder.velocityConversionFactor(1.0 / Constants.kFlywheelGearRatio);
+    flywheelFollowerConfig.follow(Constants.kFlywheelLeaderId,
         Constants.kFlywheelFollowerOpposesLeader);
 
-    flywheel_follower_ = new SparkMax(Constants.kFlywheelFollowerId, kBrushless);
-    flywheel_follower_encoder_ = flywheel_follower_.getEncoder();
-    flywheel_follower_.configure(flywheel_follower_config, ResetMode.kResetSafeParameters,
+    flywheelFollowerMotor = new SparkMax(Constants.kFlywheelFollowerId, kBrushless);
+    flywheelFollowerEncoder = flywheelFollowerMotor.getEncoder();
+    flywheelFollowerMotor.configure(flywheelFollowerConfig, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
     // Hood
-    SparkMaxConfig hood_config = new SparkMaxConfig();
-    hood_config.voltageCompensation(Constants.kVoltageCompensation);
-    hood_config.smartCurrentLimit(Constants.kHoodCurrentLimit);
-    hood_config.inverted(Constants.kHoodInverted);
-    hood_config.idleMode(IdleMode.kBrake);
-    hood_config.encoder.positionConversionFactor(360.0 / Constants.kHoodGearRatio);
-    hood_config.encoder.velocityConversionFactor((360.0 / Constants.kHoodGearRatio) / 60.0);
+    SparkMaxConfig hoodConfig = new SparkMaxConfig();
+    hoodConfig.voltageCompensation(Constants.kVoltageCompensation);
+    hoodConfig.smartCurrentLimit(Constants.kHoodCurrentLimit);
+    hoodConfig.inverted(Constants.kHoodInverted);
+    hoodConfig.idleMode(IdleMode.kBrake);
+    hoodConfig.encoder.positionConversionFactor(360.0 / Constants.kHoodGearRatio);
+    hoodConfig.encoder.velocityConversionFactor((360.0 / Constants.kHoodGearRatio) / 60.0);
 
-    hood_ = new SparkMax(Constants.kHoodId, kBrushless);
-    hood_.configure(hood_config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    hood_encoder_ = hood_.getEncoder();
-    hood_encoder_.setPosition(Constants.kHoodStartingPosition);
+    hoodMotor = new SparkMax(Constants.kHoodId, kBrushless);
+    hoodMotor.configure(hoodConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    hoodEncoder = hoodMotor.getEncoder();
+    hoodEncoder.setPosition(Constants.kHoodStartingPosition);
 
     // Rotation
-    SparkMaxConfig rotation_config = new SparkMaxConfig();
-    rotation_config.voltageCompensation(Constants.kVoltageCompensation);
-    rotation_config.smartCurrentLimit(Constants.kRotationCurrentLimit);
-    rotation_config.inverted(Constants.kRotationInverted);
-    rotation_config.idleMode(IdleMode.kBrake);
-    rotation_config.encoder.positionConversionFactor(360.0 / Constants.kRotationGearRatio);
-    rotation_config.encoder.velocityConversionFactor((360.0 / Constants.kRotationGearRatio) / 60.0);
-    rotation_config.apply(
+    SparkMaxConfig rotationConfig = new SparkMaxConfig();
+    rotationConfig.voltageCompensation(Constants.kVoltageCompensation);
+    rotationConfig.smartCurrentLimit(Constants.kRotationCurrentLimit);
+    rotationConfig.inverted(Constants.kRotationInverted);
+    rotationConfig.idleMode(IdleMode.kBrake);
+    rotationConfig.encoder.positionConversionFactor(360.0 / Constants.kRotationGearRatio);
+    rotationConfig.encoder.velocityConversionFactor((360.0 / Constants.kRotationGearRatio) / 60.0);
+    rotationConfig.apply(
         new AbsoluteEncoderConfig().apply(AbsoluteEncoderConfig.Presets.REV_ThroughBoreEncoderV2)
             .positionConversionFactor(2.0 * Math.PI) // rotations -> radians
             .velocityConversionFactor((2.0 * Math.PI) / 60.0) // rpm -> rad/s
             .zeroOffset(Constants.kEncoderOffset));
 
-    rotation_ = new SparkMax(Constants.kRotationId, kBrushless);
-    rotation_.configure(rotation_config, ResetMode.kResetSafeParameters,
+    rotationMotor = new SparkMax(Constants.kRotationId, kBrushless);
+    rotationMotor.configure(rotationConfig, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
-    bore_encoder_ = rotation_.getAbsoluteEncoder();
+    absoluteRotationEncoder = rotationMotor.getAbsoluteEncoder();
 
-    rotation_encoder_ = rotation_.getEncoder();
-    rotation_encoder_.setPosition(Constants.kRotationStartingPosition);
+    rotationEncoder = rotationMotor.getEncoder();
+    rotationEncoder.setPosition(Constants.kRotationStartingPosition);
 
-    hood_pid_ = new PIDController(Constants.kHoodP, Constants.kHoodI, Constants.kHoodD);
-    hood_pid_.setTolerance(Constants.kHoodTolerance);
+    hoodPid = new PIDController(Constants.kHoodP, Constants.kHoodI, Constants.kHoodD);
+    hoodPid.setTolerance(Constants.kHoodTolerance);
 
-    rotation_pid_ =
+    rotationPid =
         new PIDController(Constants.kRotationP, Constants.kRotationI, Constants.kRotationD);
-    rotation_pid_.setTolerance(Constants.kRotationTolerance);
+    rotationPid.setTolerance(Constants.kRotationTolerance);
 
     // Assign absolute encoder value to rotation encoder
-    resetEncoder();
+    synchronizeRotationEncoderFromAbsolute();
   }
 
   @Override
   public void periodic() {
     // Read inputs
-    io_.flywheel_leader_velocity_ = flywheel_leader_encoder_.getVelocity();
-    io_.flywheel_follower_velocity_ = flywheel_follower_encoder_.getVelocity();
-    io_.hood_position_ = hood_encoder_.getPosition();
-    io_.rotation_position_ = rotation_encoder_.getPosition();
+    periodicIO.flywheelLeaderVelocityRpm = flywheelLeaderEncoder.getVelocity();
+    periodicIO.flywheelFollowerVelocityRpm = flywheelFollowerEncoder.getVelocity();
+    periodicIO.hoodPositionDegrees = hoodEncoder.getPosition();
+    periodicIO.rotationPositionDegrees = rotationEncoder.getPosition();
 
-    io_.current_flywheel_leader_ = flywheel_leader_.getOutputCurrent();
-    io_.current_flywheel_follower_ = flywheel_follower_.getOutputCurrent();
-    io_.current_hood_ = hood_.getOutputCurrent();
-    io_.current_rotation_ = rotation_.getOutputCurrent();
+    periodicIO.flywheelLeaderCurrentAmps = flywheelLeaderMotor.getOutputCurrent();
+    periodicIO.flywheelFollowerCurrentAmps = flywheelFollowerMotor.getOutputCurrent();
+    periodicIO.hoodCurrentAmps = hoodMotor.getOutputCurrent();
+    periodicIO.rotationCurrentAmps = rotationMotor.getOutputCurrent();
 
     // Flywheel outputs
-    io_.flywheel_output_ = MathUtil.clamp(io_.flywheel_demand_, -Constants.kMaxFlywheelOutput,
+    periodicIO.flywheelOutput = MathUtil.clamp(periodicIO.flywheelDemand, -Constants.kMaxFlywheelOutput,
         Constants.kMaxFlywheelOutput);
 
     // Hood outputs
-    switch (hood_output_type_) {
+    switch (hoodControlMode) {
       case POSITION:
-        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_, io_.hood_target_),
+        periodicIO.hoodOutput = MathUtil.clamp(hoodPid.calculate(periodicIO.hoodPositionDegrees, periodicIO.hoodTargetDegrees),
             -Constants.kMaxHoodOutput, Constants.kMaxHoodOutput);
         break;
       case PERCENT:
-        io_.hood_output_ =
-            MathUtil.clamp(io_.hood_demand_, -Constants.kMaxHoodOutput, Constants.kMaxHoodOutput);
+        periodicIO.hoodOutput =
+            MathUtil.clamp(periodicIO.hoodDemand, -Constants.kMaxHoodOutput, Constants.kMaxHoodOutput);
         break;
       case BRAKE:
       default:
-        hood_pid_.setSetpoint(getHoodPosition());
-        io_.hood_output_ = MathUtil.clamp(hood_pid_.calculate(io_.hood_position_), -0.9, 0.9);
+        hoodPid.setSetpoint(getHoodPosition());
+        periodicIO.hoodOutput = MathUtil.clamp(hoodPid.calculate(periodicIO.hoodPositionDegrees), -0.9, 0.9);
     }
 
     // Rotation outputs
-    switch (rotation_output_type_) {
+    switch (rotationControlMode) {
       case POSITION:
-        io_.rotation_output_ =
-            MathUtil.clamp(rotation_pid_.calculate(io_.rotation_position_, io_.rotation_target_),
+        periodicIO.rotationOutput =
+            MathUtil.clamp(rotationPid.calculate(periodicIO.rotationPositionDegrees, periodicIO.rotationTargetDegrees),
                 -Constants.kMaxRotationOutput, Constants.kMaxRotationOutput);
         break;
       case PERCENT:
-        io_.rotation_output_ = MathUtil.clamp(io_.rotation_demand_, -Constants.kMaxRotationOutput,
+        periodicIO.rotationOutput = MathUtil.clamp(periodicIO.rotationDemand, -Constants.kMaxRotationOutput,
             Constants.kMaxRotationOutput);
         break;
       case BRAKE:
       default:
-        rotation_pid_.setSetpoint(getRotationPosition());
-        io_.rotation_output_ = MathUtil.clamp(rotation_pid_.calculate(io_.rotation_position_), -0.1, 0.1);
+        rotationPid.setSetpoint(getRotationPosition());
+        periodicIO.rotationOutput = MathUtil.clamp(rotationPid.calculate(periodicIO.rotationPositionDegrees), -0.1, 0.1);
     }
 
     // Hood soft limits
-    if (io_.hood_position_ >= Constants.kMaxHoodPosition && io_.hood_output_ > 0) {
-      io_.hood_output_ = 0;
-    } else if (io_.hood_position_ <= Constants.kMinHoodPosition && io_.hood_output_ < 0) {
-      io_.hood_output_ = 0;
+    if (periodicIO.hoodPositionDegrees >= Constants.kMaxHoodPosition && periodicIO.hoodOutput > 0) {
+      periodicIO.hoodOutput = 0;
+    } else if (periodicIO.hoodPositionDegrees <= Constants.kMinHoodPosition && periodicIO.hoodOutput < 0) {
+      periodicIO.hoodOutput = 0;
     }
 
     // Rotation soft limits
-    if (io_.rotation_position_ >= Constants.kMaxRotationPosition && io_.rotation_output_ > 0) {
-      io_.rotation_output_ = 0;
-    } else if (io_.rotation_position_ <= Constants.kMinRotationPosition
-        && io_.rotation_output_ < 0) {
-      io_.rotation_output_ = 0;
+    if (periodicIO.rotationPositionDegrees >= Constants.kMaxRotationPosition && periodicIO.rotationOutput > 0) {
+      periodicIO.rotationOutput = 0;
+    } else if (periodicIO.rotationPositionDegrees <= Constants.kMinRotationPosition
+        && periodicIO.rotationOutput < 0) {
+      periodicIO.rotationOutput = 0;
     }
 
     // Write outputs
-    flywheel_leader_.set(io_.flywheel_output_);
-    hood_.set(io_.hood_output_);
-    rotation_.set(io_.rotation_output_);
+    flywheelLeaderMotor.set(periodicIO.flywheelOutput);
+    hoodMotor.set(periodicIO.hoodOutput);
+    rotationMotor.set(periodicIO.rotationOutput);
   }
 
   /**
@@ -190,8 +190,8 @@ public class Turret extends SubsystemBase {
    *
    * @return Absolute turret angle in radians.
    */
-  public double getEncoderRadians() {
-    return bore_encoder_.getPosition();
+  public double getAbsoluteRotationRadians() {
+    return absoluteRotationEncoder.getPosition();
   }
 
   /**
@@ -201,8 +201,8 @@ public class Turret extends SubsystemBase {
    * The relative encoder is stored in degrees, so the absolute encoder radians are converted before
    * writing.
    */
-  public void resetEncoder() {
-    rotation_encoder_.setPosition(Math.toDegrees(getEncoderRadians()));
+  public void synchronizeRotationEncoderFromAbsolute() {
+    rotationEncoder.setPosition(Math.toDegrees(getAbsoluteRotationRadians()));
   }
 
   // Flywheel
@@ -212,11 +212,11 @@ public class Turret extends SubsystemBase {
    * @param percent Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public void setFlywheelPercent(double percent) {
-    io_.flywheel_demand_ = percent;
+    periodicIO.flywheelDemand = percent;
   }
 
   public void stopFlywheel() {
-    io_.flywheel_demand_ = 0;
+    periodicIO.flywheelDemand = 0;
   }
 
   /**
@@ -225,7 +225,7 @@ public class Turret extends SubsystemBase {
    * @return Motor output in the range {@code [-1.0, 1.0]}.
    */
   public double getFlywheelPercent() {
-    return io_.flywheel_output_;
+    return periodicIO.flywheelOutput;
   }
 
   /**
@@ -234,7 +234,7 @@ public class Turret extends SubsystemBase {
    * @return Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public double getFlywheelDemand() {
-    return io_.flywheel_demand_;
+    return periodicIO.flywheelDemand;
   }
 
   /**
@@ -243,7 +243,7 @@ public class Turret extends SubsystemBase {
    * @return Flywheel velocity in wheel rotations per minute.
    */
   public double getFlywheelLeaderVelocity() {
-    return io_.flywheel_leader_velocity_;
+    return periodicIO.flywheelLeaderVelocityRpm;
   }
 
   /**
@@ -252,7 +252,7 @@ public class Turret extends SubsystemBase {
    * @return Flywheel velocity in wheel rotations per minute.
    */
   public double getFlywheelFollowerVelocity() {
-    return io_.flywheel_follower_velocity_;
+    return periodicIO.flywheelFollowerVelocityRpm;
   }
 
   /**
@@ -261,7 +261,7 @@ public class Turret extends SubsystemBase {
    * @return Current draw in amps.
    */
   public double getFlywheelLeaderCurrent() {
-    return io_.current_flywheel_leader_;
+    return periodicIO.flywheelLeaderCurrentAmps;
   }
 
   /**
@@ -270,7 +270,7 @@ public class Turret extends SubsystemBase {
    * @return Current draw in amps.
    */
   public double getFlywheelFollowerCurrent() {
-    return io_.current_flywheel_follower_;
+    return periodicIO.flywheelFollowerCurrentAmps;
   }
 
   // Hood
@@ -280,16 +280,16 @@ public class Turret extends SubsystemBase {
    * @param percent Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public void setHoodPercent(double percent) {
-    hood_output_type_ = OutputType.PERCENT;
-    io_.hood_demand_ = percent;
+    hoodControlMode = ControlMode.PERCENT;
+    periodicIO.hoodDemand = percent;
   }
 
   public void setHoodBrake() {
-    hood_output_type_ = OutputType.BRAKE;
+    hoodControlMode = ControlMode.BRAKE;
   }
 
   public void setRotationBrake() {
-    rotation_output_type_ = OutputType.BRAKE;
+    rotationControlMode = ControlMode.BRAKE;
   }
 
   /**
@@ -298,8 +298,8 @@ public class Turret extends SubsystemBase {
    * @param position Hood angle in degrees, clamped to the configured hood soft limits.
    */
   public void setHoodPosition(double position) {
-    hood_output_type_ = OutputType.POSITION;
-    io_.hood_target_ =
+    hoodControlMode = ControlMode.POSITION;
+    periodicIO.hoodTargetDegrees =
         MathUtil.clamp(position, Constants.kMinHoodPosition, Constants.kMaxHoodPosition);
   }
 
@@ -313,7 +313,7 @@ public class Turret extends SubsystemBase {
    * @return {@code true} when the hood is in position mode and within the configured tolerance.
    */
   public boolean isHoodAtTarget() {
-    return hood_output_type_ == OutputType.POSITION && hood_pid_.atSetpoint();
+    return hoodControlMode == ControlMode.POSITION && hoodPid.atSetpoint();
   }
 
   /**
@@ -322,7 +322,7 @@ public class Turret extends SubsystemBase {
    * @return Hood position in degrees.
    */
   public double getHoodPosition() {
-    return io_.hood_position_;
+    return periodicIO.hoodPositionDegrees;
   }
 
   /**
@@ -331,7 +331,7 @@ public class Turret extends SubsystemBase {
    * @return Hood target angle in degrees.
    */
   public double getHoodTarget() {
-    return io_.hood_target_;
+    return periodicIO.hoodTargetDegrees;
   }
 
   /**
@@ -340,7 +340,7 @@ public class Turret extends SubsystemBase {
    * @return Current draw in amps.
    */
   public double getHoodCurrent() {
-    return io_.current_hood_;
+    return periodicIO.hoodCurrentAmps;
   }
 
   /**
@@ -349,7 +349,7 @@ public class Turret extends SubsystemBase {
    * @return Motor output in the range {@code [-1.0, 1.0]}.
    */
   public double getHoodPercent() {
-    return io_.hood_output_;
+    return periodicIO.hoodOutput;
   }
 
   // Rotation
@@ -359,8 +359,8 @@ public class Turret extends SubsystemBase {
    * @param percent Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public void setRotationPercent(double percent) {
-    rotation_output_type_ = OutputType.PERCENT;
-    io_.rotation_demand_ = percent;
+    rotationControlMode = ControlMode.PERCENT;
+    periodicIO.rotationDemand = percent;
   }
 
   /**
@@ -369,8 +369,8 @@ public class Turret extends SubsystemBase {
    * @param position Turret angle in degrees, clamped to the configured rotation soft limits.
    */
   public void setRotationPosition(double position) {
-    rotation_output_type_ = OutputType.POSITION;
-    io_.rotation_target_ =
+    rotationControlMode = ControlMode.POSITION;
+    periodicIO.rotationTargetDegrees =
         MathUtil.clamp(position, Constants.kMinRotationPosition, Constants.kMaxRotationPosition);
   }
 
@@ -384,7 +384,7 @@ public class Turret extends SubsystemBase {
    * @return {@code true} when the turret is in position mode and within the configured tolerance.
    */
   public boolean isRotationAtTarget() {
-    return rotation_output_type_ == OutputType.POSITION && rotation_pid_.atSetpoint();
+    return rotationControlMode == ControlMode.POSITION && rotationPid.atSetpoint();
   }
 
   /**
@@ -393,7 +393,7 @@ public class Turret extends SubsystemBase {
    * @return Turret position in degrees.
    */
   public double getRotationPosition() {
-    return io_.rotation_position_;
+    return periodicIO.rotationPositionDegrees;
   }
 
   /**
@@ -402,7 +402,7 @@ public class Turret extends SubsystemBase {
    * @return Turret target angle in degrees.
    */
   public double getRotationTarget() {
-    return io_.rotation_target_;
+    return periodicIO.rotationTargetDegrees;
   }
 
   /**
@@ -411,7 +411,7 @@ public class Turret extends SubsystemBase {
    * @return Current draw in amps.
    */
   public double getRotationCurrent() {
-    return io_.current_rotation_;
+    return periodicIO.rotationCurrentAmps;
   }
 
   /**
@@ -420,7 +420,7 @@ public class Turret extends SubsystemBase {
    * @return Motor output in the range {@code [-1.0, 1.0]}.
    */
   public double getRotationPercent() {
-    return io_.rotation_output_;
+    return periodicIO.rotationOutput;
   }
 
   // Helpers
@@ -430,30 +430,30 @@ public class Turret extends SubsystemBase {
     stopRotation();
   }
 
-  private enum OutputType {
+  private enum ControlMode {
     PERCENT, POSITION, BRAKE
   }
 
   public static class PeriodicIO {
     // Inputs
-    double flywheel_leader_velocity_;
-    double flywheel_follower_velocity_;
-    double hood_position_;
-    double rotation_position_;
-    double current_flywheel_leader_;
-    double current_flywheel_follower_;
-    double current_hood_;
-    double current_rotation_;
+    double flywheelLeaderVelocityRpm;
+    double flywheelFollowerVelocityRpm;
+    double hoodPositionDegrees;
+    double rotationPositionDegrees;
+    double flywheelLeaderCurrentAmps;
+    double flywheelFollowerCurrentAmps;
+    double hoodCurrentAmps;
+    double rotationCurrentAmps;
 
     // Outputs
-    double flywheel_demand_;
-    double flywheel_output_;
-    double hood_demand_;
-    double hood_output_;
-    double rotation_demand_;
-    double rotation_output_;
-    double hood_target_;
-    double rotation_target_;
+    double flywheelDemand;
+    double flywheelOutput;
+    double hoodDemand;
+    double hoodOutput;
+    double rotationDemand;
+    double rotationOutput;
+    double hoodTargetDegrees;
+    double rotationTargetDegrees;
   }
 
   public static class Constants {

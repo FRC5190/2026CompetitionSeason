@@ -20,15 +20,15 @@ import java.util.List;
  */
 public class ShootOnTheMove extends Command {
 
-  private final Turret turret_;
-  private final SwerveSubsystem drivebase_;
-  private final VisionSubsystem vision_;
+  private final Turret turret;
+  private final SwerveSubsystem drivebase;
+  private final VisionSubsystem vision;
 
-  private final Pose2d goal_pose_;
+  private final Pose2d goalPose;
 
   // Tuned constants
-  private static final double kTotalExitVelocity = 15.0; // m/s - tune to your robot
-  private static final double kLatency = 0.15; // seconds - tune to your robot
+  private static final double kTotalExitVelocityMetersPerSecond = 15.0; // m/s - tune to your robot
+  private static final double kLatencySeconds = 0.15; // seconds - tune to your robot
 
   // Physical Limelight mounting constants - MUST BE MEASURED ON YOUR ROBOT
   // private static final double kLimelightHeightInches = 24.0; // height of limelight lens from
@@ -37,22 +37,22 @@ public class ShootOnTheMove extends Command {
   // private static final double kLimelightAngleDegrees = 30.0; // limelight mounting angle from
   // horizontal
 
-  private final InterpolatingDoubleTreeMap shooter_table_ = new InterpolatingDoubleTreeMap();
+  private final InterpolatingDoubleTreeMap shooterTable = new InterpolatingDoubleTreeMap();
 
   public ShootOnTheMove(Turret turret, SwerveSubsystem drivebase, VisionSubsystem vision,
       Pose2d goalPose) {
-    turret_ = turret;
-    drivebase_ = drivebase;
-    vision_ = vision;
-    goal_pose_ = goalPose;
+    this.turret = turret;
+    this.drivebase = drivebase;
+    this.vision = vision;
+    this.goalPose = goalPose;
 
     // Distance (meters) -> Flywheel percent output
     // Tune these values on your actual robot!
     for (var entry : List.of(Pair.of(1.0, 0.4), Pair.of(2.0, 0.6), Pair.of(3.0, 0.8))) {
-      shooter_table_.put(entry.getFirst(), entry.getSecond());
+      shooterTable.put(entry.getFirst(), entry.getSecond());
     }
 
-    addRequirements(turret_, drivebase_);
+    addRequirements(this.turret, this.drivebase);
   }
 
   @Override
@@ -61,72 +61,72 @@ public class ShootOnTheMove extends Command {
   @Override
   public void execute() {
     // Get current robot speed (field oriented)
-    ChassisSpeeds robot_speed = drivebase_.getSwerveDrive().getFieldVelocity();
+    ChassisSpeeds fieldVelocity = drivebase.getSwerveDrive().getFieldVelocity();
 
     // 1. LATENCY COMPENSATION
-    Translation2d future_pos = drivebase_.getSwerveDrive().getPose().getTranslation()
-        .plus(new Translation2d(robot_speed.vxMetersPerSecond, robot_speed.vyMetersPerSecond)
-            .times(kLatency));
+    Translation2d projectedRobotPosition = drivebase.getSwerveDrive().getPose().getTranslation()
+        .plus(new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond)
+            .times(kLatencySeconds));
 
     // 2. GET DISTANCE
     // If Limelight sees the target, use ty for a direct distance measurement
     // Otherwise fall back to odometry based distance
-    double dist;
-    if (vision_.hasTag()) {
-      // dist = calculateDistanceFromTY(vision_.getTY());
-      double[] target_pose = LimelightHelpers.getBotPose_TargetSpace("limelight");
-      dist = Math.sqrt(Math.pow(target_pose[0], 2) + Math.pow(target_pose[2], 2));
+    double targetDistanceMeters;
+    if (vision.hasTarget()) {
+      // targetDistanceMeters = calculateDistanceFromTY(vision.getTY());
+      double[] targetSpacePose = LimelightHelpers.getBotPose_TargetSpace("limelight");
+      targetDistanceMeters = Math.sqrt(Math.pow(targetSpacePose[0], 2) + Math.pow(targetSpacePose[2], 2));
     } else {
-      Translation2d goal_location = goal_pose_.getTranslation();
-      Translation2d target_vec = goal_location.minus(future_pos);
-      dist = target_vec.getNorm();
+      Translation2d goalLocation = goalPose.getTranslation();
+      Translation2d targetVector = goalLocation.minus(projectedRobotPosition);
+      targetDistanceMeters = targetVector.getNorm();
     }
 
     // 3. LOOK UP IDEAL FLYWHEEL PERCENT FOR THIS DISTANCE
-    double ideal_flywheel_percent = shooter_table_.get(dist);
+    double idealFlywheelPercent = shooterTable.get(targetDistanceMeters);
 
     // 4. VECTOR SUBTRACTION
     // Use Limelight tx directly for turret angle when tag is visible
     // Otherwise calculate from odometry
-    double turret_angle;
-    double new_horizontal_speed;
+    double turretAngleDegrees;
+    double shotSpeedMetersPerSecond;
 
-    if (vision_.hasTag()) {
+    if (vision.hasTarget()) {
       // Limelight tx is the horizontal angle offset to the target
       // Subtract robot velocity compensation on top of direct tx
-      Translation2d robot_vel_vec =
-          new Translation2d(robot_speed.vxMetersPerSecond, robot_speed.vyMetersPerSecond);
+      Translation2d robotVelocity =
+          new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond);
 
       // Convert tx to a unit vector and scale by ideal speed, then subtract robot velocity
-      double tx_radians = Math.toRadians(vision_.getTX());
-      Translation2d shot_vec =
-          new Translation2d(Math.cos(tx_radians) * ideal_flywheel_percent * kTotalExitVelocity,
-              Math.sin(tx_radians) * ideal_flywheel_percent * kTotalExitVelocity)
-                  .minus(robot_vel_vec);
+      double targetBearingOffsetRadians = Math.toRadians(vision.getHorizontalOffsetDegrees());
+      Translation2d shotVector =
+          new Translation2d(Math.cos(targetBearingOffsetRadians) * idealFlywheelPercent * kTotalExitVelocityMetersPerSecond,
+              Math.sin(targetBearingOffsetRadians) * idealFlywheelPercent * kTotalExitVelocityMetersPerSecond)
+                  .minus(robotVelocity);
 
-      turret_angle = shot_vec.getAngle().getDegrees();
-      new_horizontal_speed = shot_vec.getNorm();
+      turretAngleDegrees = shotVector.getAngle().getDegrees();
+      shotSpeedMetersPerSecond = shotVector.getNorm();
     } else {
       // Fall back to odometry based vector math
-      Translation2d goal_location = goal_pose_.getTranslation();
-      Translation2d target_vec = goal_location.minus(future_pos);
-      Translation2d robot_vel_vec =
-          new Translation2d(robot_speed.vxMetersPerSecond, robot_speed.vyMetersPerSecond);
-      Translation2d shot_vec = target_vec.div(dist)
-          .times(ideal_flywheel_percent * kTotalExitVelocity).minus(robot_vel_vec);
+      Translation2d goalLocation = goalPose.getTranslation();
+      Translation2d targetVector = goalLocation.minus(projectedRobotPosition);
+      Translation2d robotVelocity =
+          new Translation2d(fieldVelocity.vxMetersPerSecond, fieldVelocity.vyMetersPerSecond);
+      Translation2d shotVector = targetVector.div(targetDistanceMeters)
+          .times(idealFlywheelPercent * kTotalExitVelocityMetersPerSecond).minus(robotVelocity);
 
-      turret_angle = shot_vec.getAngle().getDegrees();
-      new_horizontal_speed = shot_vec.getNorm();
+      turretAngleDegrees = shotVector.getAngle().getDegrees();
+      shotSpeedMetersPerSecond = shotVector.getNorm();
     }
 
     // 5. SOLVE FOR HOOD ANGLE
-    double ratio = Math.min(new_horizontal_speed / kTotalExitVelocity, 1.0);
-    double new_pitch = Math.toDegrees(Math.acos(ratio));
+    double velocityRatio = Math.min(shotSpeedMetersPerSecond / kTotalExitVelocityMetersPerSecond, 1.0);
+    double hoodPitchDegrees = Math.toDegrees(Math.acos(velocityRatio));
 
     // 6. SET OUTPUTS
-    turret_.setRotationPosition(turret_angle);
-    turret_.setHoodPosition(new_pitch);
-    turret_.setFlywheelPercent(ideal_flywheel_percent);
+    turret.setRotationPosition(turretAngleDegrees);
+    turret.setHoodPosition(hoodPitchDegrees);
+    turret.setFlywheelPercent(idealFlywheelPercent);
   }
 
   /**
@@ -147,6 +147,6 @@ public class ShootOnTheMove extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    turret_.stopAll();
+    turret.stopAll();
   }
 }

@@ -4,55 +4,55 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 
 public class VisionSubsystem extends SubsystemBase {
-  private static final String kLL = "limelight"; // change if you renamed in LL UI
+  private static final String kLimelightName = "limelight"; // change if you renamed in LL UI
 
-  private double tx = 0.0;
-  private double ty = 0.0;
-  private int closestTagID = -1;
-  private boolean hasTag = false;
+  private double horizontalOffsetDegrees = 0.0;
+  private double verticalOffsetDegrees = 0.0;
+  private int trackedTagId = -1;
+  private boolean targetVisible = false;
 
   @Override
   public void periodic() {
     // If your helper returns boolean tv, use it; otherwise use tagId == -1 as your validity
-    hasTag = LimelightHelpers.getTV(kLL);
+    targetVisible = LimelightHelpers.getTV(kLimelightName);
 
     // AprilTag ID (Limelight returns -1 when none, in your test)
-    closestTagID = (int) LimelightHelpers.getFiducialID(kLL);
+    trackedTagId = (int) LimelightHelpers.getFiducialID(kLimelightName);
 
     // Horizontal offset (degrees)
-    tx = LimelightHelpers.getTX(kLL);
-    ty = LimelightHelpers.getTY(kLL);
+    horizontalOffsetDegrees = LimelightHelpers.getTX(kLimelightName);
+    verticalOffsetDegrees = LimelightHelpers.getTY(kLimelightName);
 
     // If you want: force validity from tagId instead
-    if (closestTagID < 0) {
-      hasTag = false;
+    if (trackedTagId < 0) {
+      targetVisible = false;
     }
 
-    // System.out.println("LL hasTag=" + hasTag + " id= " + closestTagID + " tx = " + tx);
+    // System.out.println("LL hasTarget=" + hasTarget + " id= " + closestTagId + " horizontalOffsetDegrees = " + horizontalOffsetDegrees);
   }
 
-  public double getTX() {
-    return tx;
+  public double getHorizontalOffsetDegrees() {
+    return horizontalOffsetDegrees;
   }
 
-  public double getTY() {
-    return ty;
+  public double getVerticalOffsetDegrees() {
+    return verticalOffsetDegrees;
   }
 
-  public int getClosestTagID() {
-    return closestTagID;
+  public int getTrackedTagId() {
+    return trackedTagId;
   }
 
-  public boolean hasTag() {
-    return hasTag;
+  public boolean hasTarget() {
+    return targetVisible;
   }
 
   public double getTargetDistanceMeters() {
-    if (!hasTag) {
+    if (!targetVisible) {
       return -1.0;
     }
 
-    double[] targetPose = LimelightHelpers.getBotPose_TargetSpace(kLL);
+    double[] targetPose = LimelightHelpers.getBotPose_TargetSpace(kLimelightName);
     if (targetPose == null || targetPose.length < 3) {
       return -1.0;
     }

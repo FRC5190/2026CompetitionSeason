@@ -14,90 +14,90 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 public class Intake extends SubsystemBase {
 
   // Intake Motors
-  private final SparkMax roller_motor_;
-  private final SparkMax extension_motor_;
+  private final SparkMax rollerMotor;
+  private final SparkMax extensionMotor;
 
   // Intake Encoder
-  private final RelativeEncoder extension_encoder_;
-  private final RelativeEncoder roller_encoder_;
+  private final RelativeEncoder extensionEncoder;
+  private final RelativeEncoder rollerEncoder;
 
-  private final PIDController extension_pid_;
+  private final PIDController extensionPid;
 
   // Periodic IO
-  private OutputType output_type_ = OutputType.PERCENT;
-  private final PeriodicIO io_ = new PeriodicIO();
+  private ExtensionControlMode extensionControlMode = ExtensionControlMode.PERCENT;
+  private final PeriodicIO periodicIO = new PeriodicIO();
 
   public Intake() {
     // Roller
-    SparkMaxConfig roller_config = new SparkMaxConfig();
-    roller_config.voltageCompensation(12);
-    roller_config.inverted(false);
-    roller_config.idleMode(IdleMode.kBrake);
+    SparkMaxConfig rollerConfig = new SparkMaxConfig();
+    rollerConfig.voltageCompensation(12);
+    rollerConfig.inverted(false);
+    rollerConfig.idleMode(IdleMode.kBrake);
 
-    roller_motor_ = new SparkMax(Constants.kRollerId, kBrushless);
-    roller_encoder_ = roller_motor_.getEncoder();
+    rollerMotor = new SparkMax(Constants.kRollerId, kBrushless);
+    rollerEncoder = rollerMotor.getEncoder();
 
 
     // Extension
-    SparkMaxConfig extension_config = new SparkMaxConfig();
-    extension_config.voltageCompensation(12);
-    extension_config.inverted(false);
-    extension_config.idleMode(IdleMode.kBrake);
-    extension_config.encoder.positionConversionFactor(1.0 / Constants.kExtensionGearRatio);
-    extension_config.encoder.velocityConversionFactor(1.0 / Constants.kExtensionGearRatio);
+    SparkMaxConfig extensionConfig = new SparkMaxConfig();
+    extensionConfig.voltageCompensation(12);
+    extensionConfig.inverted(false);
+    extensionConfig.idleMode(IdleMode.kBrake);
+    extensionConfig.encoder.positionConversionFactor(1.0 / Constants.kExtensionGearRatio);
+    extensionConfig.encoder.velocityConversionFactor(1.0 / Constants.kExtensionGearRatio);
 
-    extension_motor_ = new SparkMax(Constants.kExtensionId, kBrushless);
-    extension_encoder_ = extension_motor_.getEncoder();
+    extensionMotor = new SparkMax(Constants.kExtensionId, kBrushless);
+    extensionEncoder = extensionMotor.getEncoder();
 
     // Safety
-    roller_config.smartCurrentLimit(Constants.kRollerCurrentLimit);
-    extension_config.smartCurrentLimit(Constants.kExtensionCurrentLimit);
-    extension_config.softLimit.forwardSoftLimit(Constants.kMaxExtensionPosition); // Double check
+    rollerConfig.smartCurrentLimit(Constants.kRollerCurrentLimit);
+    extensionConfig.smartCurrentLimit(Constants.kExtensionCurrentLimit);
+    extensionConfig.softLimit.forwardSoftLimit(Constants.kMaxExtensionPosition); // Double check
                                                                                   // this
-    extension_config.softLimit.reverseSoftLimit(Constants.kMinExtensionPosition); // Double check
+    extensionConfig.softLimit.reverseSoftLimit(Constants.kMinExtensionPosition); // Double check
                                                                                   // this
 
     // Configuration
 
-    extension_motor_.configure(extension_config, ResetMode.kResetSafeParameters,
+    extensionMotor.configure(extensionConfig, ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
-    roller_motor_.configure(roller_config, ResetMode.kResetSafeParameters,
+    rollerMotor.configure(rollerConfig, ResetMode.kResetSafeParameters,
         PersistMode.kNoPersistParameters);
 
-    extension_pid_ = new PIDController(Constants.kExtensionP, 0.0, Constants.kExtensionD);
-    extension_pid_.setTolerance(Constants.kExtensionTolerance);
+    extensionPid = new PIDController(Constants.kExtensionP, 0.0, Constants.kExtensionD);
+    extensionPid.setTolerance(Constants.kExtensionTolerance);
   }
 
   @Override
   public void periodic() {
     // Read inputs
-    io_.current_roller_ = roller_motor_.getOutputCurrent();
-    io_.current_extension_ = extension_motor_.getOutputCurrent();
+    periodicIO.rollerCurrentAmps = rollerMotor.getOutputCurrent();
+    periodicIO.extensionCurrentAmps = extensionMotor.getOutputCurrent();
 
-    io_.current_extension_position_ = extension_encoder_.getPosition();
-    io_.current_roller_velocity_ = roller_encoder_.getVelocity();
+    periodicIO.extensionPosition = extensionEncoder.getPosition();
+    periodicIO.rollerVelocityRpm = rollerEncoder.getVelocity();
 
     // Roller Outputs
-    roller_motor_.set(io_.roller_demand_);
+    rollerMotor.set(periodicIO.rollerDemand);
 
     // Extension Outputs
-    switch (output_type_) {
-      case DISTANCE:
-        extension_pid_.setSetpoint(io_.extension_target_);
+    switch (extensionControlMode) {
+      case POSITION:
+        extensionPid.setSetpoint(periodicIO.extensionTarget);
         double output = MathUtil.clamp(
-            extension_pid_.calculate(io_.current_extension_position_, io_.extension_target_), -0.2,
+            extensionPid.calculate(periodicIO.extensionPosition, periodicIO.extensionTarget), -0.2,
             0.2);
-        io_.extension_demand_ = output;
+        periodicIO.extensionDemand = output;
 
-        extension_motor_.set(io_.extension_demand_);
+        extensionMotor.set(periodicIO.extensionDemand);
         break;
       case BRAKE:
-        io_.extension_demand_ = 0;
+        periodicIO.extensionDemand = 0;
 
-        extension_motor_.set(io_.extension_demand_);
+        extensionMotor.set(periodicIO.extensionDemand);
         break;
       case PERCENT:
-        extension_motor_.set(io_.extension_demand_);
+        extensionMotor.set(periodicIO.extensionDemand);
         break;
     }
   }
@@ -108,7 +108,7 @@ public class Intake extends SubsystemBase {
    * @param value Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public void setRollerPercent(double value) {
-    io_.roller_demand_ = value;
+    periodicIO.rollerDemand = value;
   }
 
   /**
@@ -117,8 +117,8 @@ public class Intake extends SubsystemBase {
    * @param value Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public void setExtensionPercent(double value) {
-    output_type_ = OutputType.PERCENT;
-    io_.extension_demand_ = value;
+    extensionControlMode = ExtensionControlMode.PERCENT;
+    periodicIO.extensionDemand = value;
   }
 
   /**
@@ -128,8 +128,8 @@ public class Intake extends SubsystemBase {
    *        limits.
    */
   public void setExtensionPosition(double position) {
-    output_type_ = OutputType.DISTANCE;
-    io_.extension_target_ =
+    extensionControlMode = ExtensionControlMode.POSITION;
+    periodicIO.extensionTarget =
         MathUtil.clamp(position, Constants.kMinExtensionPosition, Constants.kMaxExtensionPosition);
   }
 
@@ -137,7 +137,7 @@ public class Intake extends SubsystemBase {
    * Holds the extension at its current measured position using closed-loop brake control.
    */
   public void setExtensionBrake() {
-    setExtensionBrake(io_.current_extension_position_);
+    setExtensionBrake(periodicIO.extensionPosition);
   }
 
   /**
@@ -147,26 +147,26 @@ public class Intake extends SubsystemBase {
    *        limits.
    */
   public void setExtensionBrake(double position) {
-    output_type_ = OutputType.BRAKE;
-    io_.extension_target_ =
+    extensionControlMode = ExtensionControlMode.BRAKE;
+    periodicIO.extensionTarget =
         MathUtil.clamp(position, Constants.kMinExtensionPosition, Constants.kMaxExtensionPosition);
   }
 
   /** Stop all motors */
   public void stopAll() {
-    io_.roller_demand_ = 0;
-    io_.extension_demand_ = 0;
+    periodicIO.rollerDemand = 0;
+    periodicIO.extensionDemand = 0;
   }
 
   /** Stop only the roller */
   public void stopRoller() {
-    io_.roller_demand_ = 0;
+    periodicIO.rollerDemand = 0;
   }
 
   /** Stop only the extension motor */
   public void stopExtension() {
-    output_type_ = OutputType.PERCENT;
-    io_.extension_demand_ = 0;
+    extensionControlMode = ExtensionControlMode.PERCENT;
+    periodicIO.extensionDemand = 0;
   }
 
   /**
@@ -175,7 +175,7 @@ public class Intake extends SubsystemBase {
    * @return Current draw in amps.
    */
   public double getRollerCurrent() {
-    return io_.current_roller_;
+    return periodicIO.rollerCurrentAmps;
   }
 
   /**
@@ -184,7 +184,7 @@ public class Intake extends SubsystemBase {
    * @return Current draw in amps.
    */
   public double getExtensionCurrent() {
-    return io_.current_extension_;
+    return periodicIO.extensionCurrentAmps;
   }
 
   /**
@@ -193,7 +193,7 @@ public class Intake extends SubsystemBase {
    * @return Extension position in output-shaft rotations.
    */
   public double getExtensionPosition() {
-    return io_.current_extension_position_;
+    return periodicIO.extensionPosition;
   }
 
   /**
@@ -202,7 +202,7 @@ public class Intake extends SubsystemBase {
    * @return Roller velocity in motor rotations per minute.
    */
   public double getRollerVelocity() {
-    return io_.current_roller_velocity_;
+    return periodicIO.rollerVelocityRpm;
   }
 
   /**
@@ -211,7 +211,7 @@ public class Intake extends SubsystemBase {
    * @return Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public double getRollerDemand() {
-    return io_.roller_demand_;
+    return periodicIO.rollerDemand;
   }
 
   /**
@@ -220,7 +220,7 @@ public class Intake extends SubsystemBase {
    * @return Motor output demand in the range {@code [-1.0, 1.0]}.
    */
   public double getExtensionDemand() {
-    return io_.extension_demand_;
+    return periodicIO.extensionDemand;
   }
 
   /**
@@ -229,7 +229,7 @@ public class Intake extends SubsystemBase {
    * @return Extension target in output-shaft rotations.
    */
   public double getExtensionTarget() {
-    return io_.extension_target_;
+    return periodicIO.extensionTarget;
   }
 
   /**
@@ -238,29 +238,29 @@ public class Intake extends SubsystemBase {
    * @return {@code true} when the extension is in distance or brake mode and within tolerance.
    */
   public boolean isExtensionAtTarget() {
-    return output_type_ != OutputType.PERCENT && extension_pid_.atSetpoint();
+    return extensionControlMode != ExtensionControlMode.PERCENT && extensionPid.atSetpoint();
   }
 
   public boolean isExtensionNearTarget() {
-    return Math.abs(io_.extension_target_ - io_.current_extension_position_)
+    return Math.abs(periodicIO.extensionTarget - periodicIO.extensionPosition)
         <= Constants.kExtensionTolerance;
   }
 
-  private enum OutputType {
-    PERCENT, DISTANCE, BRAKE
+  private enum ExtensionControlMode {
+    PERCENT, POSITION, BRAKE
   }
 
   public static class PeriodicIO {
     // Inputs
-    double current_roller_;
-    double current_extension_;
-    double current_extension_position_;
-    double current_roller_velocity_;
+    double rollerCurrentAmps;
+    double extensionCurrentAmps;
+    double extensionPosition;
+    double rollerVelocityRpm;
 
     // Outputs
-    double roller_demand_;
-    double extension_demand_;
-    double extension_target_;
+    double rollerDemand;
+    double extensionDemand;
+    double extensionTarget;
   }
 
   public static class Constants {

@@ -10,10 +10,10 @@ public class AlignTurretToTag extends Command {
   private final VisionSubsystem vision;
 
   // how agressively the motor moves to position (tune later)
-  private static final double kP = 0.02;
+  private static final double kProportionalGain = 0.02;
 
   // acceptable error (degrees)
-  private static final double tolerance = 1.0;
+  private static final double kAlignmentToleranceDegrees = 1.0;
 
   public AlignTurretToTag(Turret turret, VisionSubsystem vision) {
     this.turret = turret;
@@ -25,24 +25,24 @@ public class AlignTurretToTag extends Command {
   @Override
   public void execute() {
 
-    if (!vision.hasTag()) {
+    if (!vision.hasTarget()) {
       turret.setRotationPercent(0.15); // slowly searches
       return;
     }
 
-    double error = vision.getTX();
+    double horizontalErrorDegrees = vision.getHorizontalOffsetDegrees();
 
-    double output = error * kP;
+    double rotationOutputPercent = horizontalErrorDegrees * kProportionalGain;
 
-    turret.setRotationPercent(output);
+    turret.setRotationPercent(rotationOutputPercent);
   }
 
   @Override
   public boolean isFinished() {
-    if (!vision.hasTag())
+    if (!vision.hasTarget())
       return false;
 
-    return Math.abs(vision.getTX()) < tolerance;
+    return Math.abs(vision.getHorizontalOffsetDegrees()) < kAlignmentToleranceDegrees;
   }
 
   @Override
